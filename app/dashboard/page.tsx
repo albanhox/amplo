@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 import { Wordmark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NICHES, getNiche, type ContentType } from "@/lib/niches";
+import { PLANS } from "@/lib/pricing";
 import type { BrandProfile, GeneratedPost } from "@/lib/agents/types";
 
-type Tab = "studio" | "calendar" | "queue" | "reviews" | "growth";
+type Tab = "studio" | "calendar" | "queue" | "reviews" | "growth" | "settings";
 
 const DEFAULT_BRAND: BrandProfile = {
   nicheId: "realtor",
@@ -58,6 +59,7 @@ export default function Dashboard() {
             ["queue", "🗂️ Queue"],
             ["reviews", "⭐ Reviews"],
             ["growth", "📈 Growth"],
+            ["settings", "⚙️ Connect & Billing"],
           ] as [Tab, string][]).map(([id, label]) => (
             <button key={id} onClick={() => setTab(id)} style={tabStyle(tab === id)}>{label}</button>
           ))}
@@ -68,6 +70,7 @@ export default function Dashboard() {
         {tab === "queue" && <Queue niche={niche} />}
         {tab === "reviews" && <Reviews brand={brand} />}
         {tab === "growth" && <Growth />}
+        {tab === "settings" && <Settings brand={brand} />}
       </div>
     </div>
   );
@@ -298,6 +301,159 @@ function Growth() {
         </svg>
         <div style={{ fontSize: 12, fontWeight: 700, color: "var(--good)", marginTop: 10 }}>● Autopilot started — steady climb in reach and engagement.</div>
       </div>
+    </div>
+  );
+}
+
+/* ---------------- Connect & Billing ---------------- */
+interface BrandRecord {
+  id: string;
+  autopilot: boolean;
+  plan?: string;
+  connections: { google?: { connected: boolean; accountName?: string }; meta?: { connected: boolean; accountName?: string } };
+}
+
+function Settings({ brand }: { brand: BrandProfile }) {
+  const [brandId, setBrandId] = useState<string | null>(null);
+  const [record, setRecord] = useState<BrandRecord | null>(null);
+  const [banner, setBanner] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function loadRecord(id: string) {
+    try {
+      const res = await fetch(`/api/brands?id=${id}`);
+      if (res.ok) setRecord((await res.json()).brand);
+    } catch {}
+  }
+
+  async function ensureBrand(): Promise<string | null> {
+    let id = localStorage.getItem("amplo-brand-id");
+    if (!id) {
+      try {
+        const res = await fetch("/api/brands", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(brand),
+        });
+        const data = await res.json();
+        id = data.brandId;
+        if (id) localStorage.setItem("amplo-brand-id", id);
+      } catch {}
+    }
+    return id;
+  }
+
+  useEffect(() => {
+    (async () => {
+      const id = await ensureBrand();
+      if (id) { setBrandId(id); loadRecord(id); }
+    })();
+    const p = new URLSearchParams(window.location.search);
+    if (p.get("connect")?.endsWith("_ok")) setBanner(`✓ ${p.get("connect")!.replace("_ok", "")} connected${p.get("sim") ? " (simulated)" : ""}.`);
+    if (p.get("checkout") === "success") setBanner(`✓ Subscription active${p.get("sim") ? " (simulated checkout)" : ""}.`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function toggleAutopilot() {
+    if (!brandId) return;
+    setBusy(true);
+    try {
+      const res = await fetch("/api/brands", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: brandId, autopilot: !record?.autopilot }),
+      });
+      if (res.ok) setRecord((await res.json()).brand);
+    } finally { setBusy(false); }
+  }
+
+  async function checkout(plan: string) {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, cadence: "monthly" }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } finally { setBusy(false); }
+  }
+
+  const g = record?.connections?.google?.connected;
+  const m = record?.connections?.meta?.connected;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {banner && (
+        <div className="card" style={{ padding: "12px 16px", borderColor: "var(--good)", background: "var(--good-soft)", color: "var(--good)", fontWeight: 700, fontSize: 14 }}>{banner}</div>
+      )}
+
+      {/* Autopilot */}
+      <div className="card" style={{ padding: 20, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+        <div style={{ flex: 1, minWidth: 220 }}>
+          <div style={{ fontWeight: 850, fontSize: 16 }}>Autopilot</div>
+          <div style={{ fontSize: 13.5, color: "var(--muted)", fontWeight: 500, marginTop: 3 }}>
+            When on, Amplo plans your calendar, turns new 5★ reviews into posts, and publishes on schedule — hands-free.
+          </div>
+        </div>
+        <button onClick={toggleAutopilot} disabled={busy || !brandId} className={record?.autopilot ? "btn btn-primary" : "btn btn-ghost"} style={{ opacity: brandId ? 1 : 0.5 }}>
+          {record?.autopilot ? "● Autopilot ON" : "Turn on autopilot"}
+        </button>
+      </div>
+
+      {/* Connections */}
+      <div className="card" style={{ padding: 20 }}>
+        <div style={{ fontWeight: 850, fontSize: 16, marginBottom: 4 }}>Connections</div>
+        <div style={{ fontSize: 13.5, color: "var(--muted)", fontWeight: 500, marginBottom: 14 }}>
+          Link Google to read reviews & post locally; link Meta to publish to Instagram & Facebook.
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <ConnRow name="Google Business" desc="Reviews + local posts" color="#4285F4" letter="G" connected={!!g}
+            href={brandId ? `/api/connect/google?brandId=${brandId}` : undefined} />
+          <ConnRow name="Instagram + Facebook" desc="Publish to your pages" color="#E4405F" letter="M" connected={!!m}
+            href={brandId ? `/api/connect/meta?brandId=${brandId}` : undefined} />
+        </div>
+      </div>
+
+      {/* Billing */}
+      <div className="card" style={{ padding: 20 }}>
+        <div style={{ fontWeight: 850, fontSize: 16, marginBottom: 4 }}>Plan &amp; billing</div>
+        <div style={{ fontSize: 13.5, color: "var(--muted)", fontWeight: 500, marginBottom: 14 }}>
+          Current plan: <b style={{ color: "var(--ink)", textTransform: "capitalize" }}>{record?.plan || "starter"}</b>. Change anytime — month-to-month.
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12 }}>
+          {PLANS.map((p) => (
+            <div key={p.id} className="card" style={{ padding: 16, borderColor: p.featured ? "var(--brand)" : "var(--line)" }}>
+              <div style={{ fontWeight: 850, textTransform: "uppercase", fontSize: 13, color: p.featured ? "var(--brand)" : "var(--muted)" }}>{p.name}</div>
+              <div style={{ fontSize: 26, fontWeight: 850, letterSpacing: "-.03em", marginTop: 4 }}>${p.monthly}<span style={{ fontSize: 13, fontWeight: 700, color: "var(--muted)" }}>/mo</span></div>
+              <button onClick={() => checkout(p.id)} disabled={busy} className={p.featured ? "btn btn-primary" : "btn btn-ghost"} style={{ width: "100%", justifyContent: "center", marginTop: 12, padding: "8px 12px", fontSize: 13 }}>
+                {p.id === "starter" ? "Choose Starter" : `Subscribe`}
+              </button>
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: 12, color: "var(--faint)", fontWeight: 600, marginTop: 12 }}>
+          Checkout runs in simulated mode until STRIPE_SECRET_KEY is set — no card is charged.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConnRow({ name, desc, color, letter, connected, href }: { name: string; desc: string; color: string; letter: string; connected: boolean; href?: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 14px", border: "1px solid var(--line-2)", borderRadius: 13, background: "var(--surface-2)" }}>
+      <span style={{ width: 40, height: 40, borderRadius: 10, background: color, color: "#fff", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 18 }}>{letter}</span>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: 800, fontSize: 15 }}>{name}</div>
+        <div style={{ fontSize: 12.5, color: "var(--faint)", fontWeight: 600 }}>{desc}</div>
+      </div>
+      {connected ? (
+        <span style={{ fontSize: 12.5, fontWeight: 800, color: "var(--good)", background: "var(--good-soft)", padding: "8px 14px", borderRadius: 10 }}>✓ Connected</span>
+      ) : (
+        <a href={href} className="btn btn-primary" style={{ padding: "8px 16px", fontSize: 13.5, pointerEvents: href ? "auto" : "none", opacity: href ? 1 : 0.5 }}>Connect</a>
+      )}
     </div>
   );
 }

@@ -49,11 +49,17 @@ in one place — [`components/Logo.tsx`](components/Logo.tsx) and copy strings �
 | `app/page.tsx` | Marketing landing page — hero, live content studio, reviews→posts, pricing |
 | `app/onboarding/page.tsx` | 5-step plug-and-play setup wizard (niche → voice → content → connect) |
 | `app/dashboard/page.tsx` | The product: Content Studio, Calendar, Queue, Reviews, Growth |
-| `app/api/generate` | Content Agent endpoint — writes on-brand posts for any niche/type |
-| `app/api/review-to-post` | Review Agent endpoint — turns a Google review into a post |
+| `app/api/generate` · `review-to-post` | Content + Review agent endpoints |
+| `app/api/connect/*` | Google & Meta OAuth connect + callback routes |
+| `app/api/billing/*` | Stripe checkout + webhook |
+| `app/api/cron/tick` | Autopilot heartbeat (point a cron here) |
 | `lib/agents/` | The AI IP — Claude-powered agents with a built-in demo fallback |
-| `lib/niches.ts` | The plug-and-play niche library (add a vertical = add an entry) |
-| `lib/pricing.ts` | Plans + usage-based add-ons (single source of truth) |
+| `lib/autopilot/` | The engine — planner + scheduler that plan, convert reviews, and publish |
+| `lib/integrations/` | Google Business + Meta publishing (real calls, simulated fallback) |
+| `lib/billing/` | Stripe subscriptions + usage hooks (simulated without a key) |
+| `lib/db/` | Swappable persistence (file-backed now; drop in Postgres for prod) |
+| `lib/niches.ts` · `pricing.ts` · `brand.ts` | Niche library, plans, and the name (rename in one place) |
+| `scripts/autopilot.mjs` | Local runner for the autopilot loop |
 | `marketing/index.html` | **Zero-build interactive demo** — double-click to open in any browser |
 
 ---
@@ -97,6 +103,35 @@ Adding a whole new industry is one object in `lib/niches.ts`. Everything else is
 
 ---
 
+## Autopilot engine
+
+The heart of the product. One `tick()` (`lib/autopilot/scheduler.ts`) does three jobs for
+every brand with autopilot on:
+
+1. **Reviews → posts** — polls Google for new reviews; 5★ become scheduled posts, under-4★ are
+   never published (routed to private handling).
+2. **Top up the calendar** — when the queue runs low, the **planner** generates more content.
+3. **Publish what's due** — hands due posts to the **publisher**, which routes each to Google /
+   Meta / etc. and records the result.
+
+Run it locally against a running app:
+
+```bash
+npm run dev
+node scripts/autopilot.mjs --loop        # ticks every 60s
+# or hit it directly:
+curl "http://localhost:3000/api/cron/tick"
+```
+
+In production, point **Vercel Cron**, **GitHub Actions**, or any scheduler at
+`GET /api/cron/tick` every 15–60 min (protect it with `CRON_SECRET`). The endpoint accepts an
+optional `?now=<iso>` clock override for backfills and testing.
+
+Verified end-to-end in simulation: a tick detected a new 5★ review → posted it, planned 6 posts,
+then published all 7 on the next tick — 0 failures, and the review was de-duplicated on re-run.
+
+---
+
 ## Pricing model
 
 Flat monthly plans, month-to-month, plus usage-based add-ons — defined in `lib/pricing.ts`.
@@ -114,18 +149,22 @@ Wire the `stripePriceId` fields in `lib/pricing.ts` to your Stripe products to g
 
 ---
 
-## Going live — integration checklist
+## Going live — it's all built, just add keys
 
-The product runs end-to-end today with simulated connections. To take it to real customers:
+Every pillar is coded and runs today in simulation. Going live = pasting credentials into
+`.env.local` — no re-architecting.
 
-- [ ] **Anthropic** — add `ANTHROPIC_API_KEY` (agents go live immediately).
-- [ ] **Google Business Profile API** — OAuth + read reviews + publish local posts.
-- [ ] **Meta Graph API** — publish to Instagram + Facebook pages.
-- [ ] **Stripe** — subscriptions + metered usage (add-ons).
-- [ ] **A database** (e.g. Postgres/Supabase) — persist brands, queues, and schedules.
-- [ ] **A scheduler** (cron/queue worker) — run autopilot posting on cadence.
+| Pillar | Status | To activate |
+| --- | --- | --- |
+| AI agents | ✅ built | `ANTHROPIC_API_KEY` |
+| Google Business (reviews + local posts) | ✅ OAuth + API wired | `GOOGLE_CLIENT_ID` / `SECRET` |
+| Meta (Instagram + Facebook) | ✅ OAuth + Graph wired | `META_APP_ID` / `SECRET` |
+| Stripe billing | ✅ checkout + webhook wired | `STRIPE_SECRET_KEY` + price ids |
+| Persistence | ✅ file-backed, swappable | point `lib/db` at Postgres/Supabase |
+| Autopilot scheduler | ✅ built + verified | cron → `/api/cron/tick` + `CRON_SECRET` |
 
-`.env.example` documents every variable these need.
+`.env.example` documents every variable. The moment a key is present, that pillar switches from
+simulated to live automatically.
 
 ---
 

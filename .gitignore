@@ -24,6 +24,9 @@ yarn-error.log*
 .env
 .env*.local
 
+# local file-backed datastore (dev/self-host)
+/.data
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

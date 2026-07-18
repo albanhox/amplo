@@ -1,0 +1,63 @@
+import { NextRequest, NextResponse } from "next/server";
+import { brands, createAccount } from "@/lib/db/repo";
+import { newId } from "@/lib/db/store";
+import type { Brand } from "@/lib/db/types";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+/** Create/persist a brand from onboarding. */
+export async function POST(req: NextRequest) {
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  if (!body?.nicheId || !body?.businessName) {
+    return NextResponse.json({ error: "nicheId and businessName are required" }, { status: 400 });
+  }
+
+  const account = createAccount(body.email || "demo@amplo.co");
+  const brand: Brand = {
+    id: newId("brand"),
+    accountId: account.id,
+    nicheId: body.nicheId,
+    businessName: body.businessName,
+    city: body.city,
+    about: body.about,
+    tone: body.tone || [],
+    platforms: body.platforms || ["Instagram"],
+    contentTypes: body.types || body.contentTypes || ["tip", "review", "offer", "seo"],
+    accent: body.accent,
+    autopilot: false,
+    connections: {},
+    createdAt: new Date().toISOString(),
+  };
+  brands.upsert(brand);
+  return NextResponse.json({ brandId: brand.id, accountId: account.id });
+}
+
+/** Update a brand (e.g. toggle autopilot). */
+export async function PATCH(req: NextRequest) {
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  if (!body?.id) return NextResponse.json({ error: "id is required" }, { status: 400 });
+  const { id, ...patch } = body;
+  const updated = brands.update(id, patch);
+  if (!updated) return NextResponse.json({ error: "Brand not found" }, { status: 404 });
+  return NextResponse.json({ brand: updated });
+}
+
+/** Read a brand by id: /api/brands?id=... */
+export async function GET(req: NextRequest) {
+  const id = req.nextUrl.searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
+  const brand = brands.get(id);
+  if (!brand) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json({ brand });
+}

@@ -157,8 +157,8 @@ export default function Home() {
             <a href="#how">How it works</a>
             <a href="#reviews">Reviews → Posts</a>
             <a href="#pricing">Pricing</a>
-            <span>Privacy</span>
-            <span>Terms</span>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
           </div>
           <div>Local marketing on autopilot.</div>
         </div>

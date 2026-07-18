@@ -28,12 +28,27 @@ export default function Onboarding() {
     set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
   }
 
-  function finish() {
+  const [saving, setSaving] = useState(false);
+  async function finish() {
     const brand = { nicheId, businessName, city, about, tone, platforms, types };
     try {
       localStorage.setItem("amplo-brand", JSON.stringify(brand));
     } catch {}
-    router.push("/dashboard");
+    setSaving(true);
+    try {
+      const res = await fetch("/api/brands", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(brand),
+      });
+      const data = await res.json();
+      if (data.brandId) localStorage.setItem("amplo-brand-id", data.brandId);
+    } catch {
+      /* persistence is best-effort; dashboard still works from localStorage */
+    } finally {
+      setSaving(false);
+      router.push("/dashboard");
+    }
   }
 
   const canNext =
@@ -142,7 +157,7 @@ export default function Onboarding() {
             <H>You’re set, {businessName || "friend"}.</H>
             <P style={{ marginInline: "auto" }}>Amplo is building your first month of content right now. Head to your dashboard to review the calendar and flip on autopilot.</P>
             <div style={{ display: "inline-flex", gap: 12, marginTop: 28, flexWrap: "wrap", justifyContent: "center" }}>
-              <button onClick={finish} className="btn btn-primary">Go to my dashboard →</button>
+              <button onClick={finish} disabled={saving} className="btn btn-primary">{saving ? "Setting up…" : "Go to my dashboard →"}</button>
             </div>
           </div>
         )}
