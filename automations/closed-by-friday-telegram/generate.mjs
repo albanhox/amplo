@@ -16,16 +16,23 @@
  *   node generate.mjs --send         # generate AND send to Telegram
  *   POSTS=6 SEO=4 node generate.mjs  # tune how many of each
  *
+ * Delivery (pick one; env vars keep secrets out of the repo):
+ *   TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID   send DIRECTLY via api.telegram.org
+ *                                           (works from cloud/Routine environments)
+ *   CBF_RELAY_URL                           send via a VPS relay instead
+ *                                           (use only where the relay is reachable)
+ *
  * Env:
  *   ANTHROPIC_API_KEY   live AI generation (omit → built-in sample)
  *   AMPLO_MODEL         model id (default claude-sonnet-5)
- *   CBF_RELAY_URL       Telegram relay send endpoint (default: VPS relay)
  */
 import { CBF } from "./brand.mjs";
 
 const SEND = process.argv.includes("--send");
 const MODEL = process.env.AMPLO_MODEL || "claude-sonnet-5";
-const RELAY_URL = process.env.CBF_RELAY_URL || "http://187.77.200.250:5055/send";
+const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TG_CHAT = process.env.TELEGRAM_CHAT_ID;
+const RELAY_URL = process.env.CBF_RELAY_URL; // optional; only if reachable
 const N_POSTS = Number(process.env.POSTS || 5);
 const N_SEO = Number(process.env.SEO || 3);
 
@@ -107,12 +114,27 @@ function formatDigest(data) {
 
 // ---------- delivery ----------
 async function sendToTelegram(message) {
-  const res = await fetch(RELAY_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message }),
-  });
-  if (!res.ok) throw new Error(`Relay responded ${res.status}`);
+  // Preferred: direct Telegram Bot API over HTTPS (works from cloud/Routine envs).
+  if (TG_TOKEN && TG_CHAT) {
+    const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: TG_CHAT, text: message }),
+    });
+    if (!res.ok) throw new Error(`Telegram API responded ${res.status}: ${await res.text()}`);
+    return "telegram-api";
+  }
+  // Fallback: a VPS relay, only where it's reachable.
+  if (RELAY_URL) {
+    const res = await fetch(RELAY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+    if (!res.ok) throw new Error(`Relay responded ${res.status}`);
+    return "relay";
+  }
+  throw new Error("No delivery configured — set TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID (or CBF_RELAY_URL)");
 }
 
 // ---------- main ----------
@@ -139,8 +161,8 @@ async function main() {
 
   if (SEND) {
     try {
-      await sendToTelegram(digest);
-      console.log(`✓ Sent to Telegram via ${RELAY_URL}`);
+      const via = await sendToTelegram(digest);
+      console.log(`✓ Sent to Telegram (via ${via})`);
     } catch (e) {
       console.error(`✗ Send failed: ${e.message}`);
       process.exitCode = 1;

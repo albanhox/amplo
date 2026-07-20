@@ -38,11 +38,14 @@ API key — it falls back to a built-in sample so you can see the exact format. 
 | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | Live AI generation | *(sample if unset)* |
 | `AMPLO_MODEL` | Model id | `claude-sonnet-5` |
-| `CBF_RELAY_URL` | Telegram relay send endpoint | your VPS relay `…:5055/send` |
+| `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` | **Preferred** delivery — direct via `api.telegram.org` | — |
+| `CBF_RELAY_URL` | Alternative delivery via a VPS relay | — |
 | `POSTS` / `SEO` | How many of each to generate | `5` / `3` |
 
-It sends through your existing Telegram **relay** (the same one your morning briefing
-uses) — it never calls `api.telegram.org` directly, so no bot token lives in this repo.
+**Delivery:** set `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` to send straight through
+the Telegram Bot API over HTTPS — this works from cloud/scheduled environments (a raw-IP
+VPS relay does not). Secrets stay in env vars, never in the repo. `CBF_RELAY_URL` remains
+available for machines where a relay is reachable.
 
 ## Schedule it (make it automatic again)
 
