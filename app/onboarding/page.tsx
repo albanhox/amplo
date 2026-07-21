@@ -2,35 +2,66 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Wordmark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { NICHES, CONTENT_TYPES, type ContentType } from "@/lib/niches";
+import { SETUP_ROLES, VOICES, FREQUENCIES, getSetupRole } from "@/lib/setupConfig";
 
-const TONES = ["Warm", "Professional", "Playful", "Bold", "Reassuring", "Luxury", "No-nonsense"];
-const PLATFORMS = ["Instagram", "Facebook", "TikTok", "Google Business", "LinkedIn"];
-
+/**
+ * Amplo setup — built for realtors & loan officers, and kept dead simple:
+ * mostly one-tap choices, only two things to type, smart defaults everywhere.
+ */
 export default function Onboarding() {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [nicheId, setNicheId] = useState("");
+
+  const [roleId, setRoleId] = useState<string>("");
   const [businessName, setBusinessName] = useState("");
-  const [city, setCity] = useState("");
-  const [about, setAbout] = useState("");
-  const [tone, setTone] = useState<string[]>([]);
-  const [types, setTypes] = useState<ContentType[]>(["tip", "review", "offer"]);
-  const [platforms, setPlatforms] = useState<string[]>(["Instagram", "Facebook", "Google Business"]);
+  const [market, setMarket] = useState("");
+  const [themes, setThemes] = useState<string[]>([]);
+  const [voice, setVoice] = useState("friendly");
+  const [frequency, setFrequency] = useState("grow");
+  const [connected, setConnected] = useState<Record<string, boolean>>({});
+  const [saving, setSaving] = useState(false);
 
-  const steps = ["Your business", "Your voice", "What to post", "Connect", "You're set"];
-  const niche = NICHES.find((n) => n.id === nicheId);
+  const role = getSetupRole(roleId);
+  const steps = ["You", "Business", "Content", "Style", "Connect"];
 
-  function toggle<T>(arr: T[], v: T, set: (x: T[]) => void) {
-    set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
+  // choosing a role seeds its default themes and auto-advances
+  function chooseRole(id: string) {
+    const r = getSetupRole(id);
+    setRoleId(id);
+    setThemes(r ? r.themes.filter((t) => t.on).map((t) => t.id) : []);
+    setStep(1);
   }
 
-  const [saving, setSaving] = useState(false);
+  function toggleTheme(id: string) {
+    setThemes((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
+  const canContinue =
+    (step === 1 && businessName.trim().length > 0) ||
+    (step === 2 && themes.length > 0) ||
+    step === 3 ||
+    step === 4;
+
   async function finish() {
-    const brand = { nicheId, businessName, city, about, tone, platforms, types };
+    if (!role) return;
+    const themeLabels = role.themes.filter((t) => themes.includes(t.id)).map((t) => t.label);
+    const voiceLabel = VOICES.find((v) => v.id === voice)?.label ?? "Friendly";
+    const perWeek = FREQUENCIES.find((f) => f.id === frequency)?.perWeek ?? 5;
+
+    const brand = {
+      nicheId: role.nicheId,
+      businessName: businessName.trim(),
+      city: market.trim(),
+      tone: [voiceLabel],
+      platforms: role.defaultPlatforms,
+      contentTypes: ["tip", "review", "offer", "seo"],
+      about: `Focus topics: ${themeLabels.join(", ")}. Voice: ${voiceLabel}. Posting ${perWeek}x/week.`,
+      themes: themeLabels,
+      postsPerWeek: perWeek,
+    };
     try {
       localStorage.setItem("amplo-brand", JSON.stringify(brand));
     } catch {}
@@ -44,19 +75,11 @@ export default function Onboarding() {
       const data = await res.json();
       if (data.brandId) localStorage.setItem("amplo-brand-id", data.brandId);
     } catch {
-      /* persistence is best-effort; dashboard still works from localStorage */
+      /* dashboard still works from localStorage */
     } finally {
-      setSaving(false);
-      router.push("/dashboard");
+      router.push("/dashboard?welcome=1");
     }
   }
-
-  const canNext =
-    (step === 0 && nicheId && businessName.trim()) ||
-    (step === 1 && tone.length) ||
-    (step === 2 && types.length && platforms.length) ||
-    step === 3 ||
-    step === 4;
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
@@ -70,105 +93,134 @@ export default function Onboarding() {
         </div>
       </header>
 
-      {/* progress */}
       <div style={{ height: 4, background: "var(--surface-3)" }}>
         <div style={{ height: "100%", width: `${((step + 1) / steps.length) * 100}%`, background: "var(--brand)", transition: "width .3s" }} />
       </div>
 
-      <main className="wrap" style={{ flex: 1, maxWidth: 720, padding: "48px 22px 80px", width: "100%" }}>
+      <main className="wrap" style={{ flex: 1, maxWidth: 680, padding: "44px 22px 80px", width: "100%" }}>
         <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--brand)" }}>{steps[step]}</div>
 
+        {/* STEP 0 — role */}
         {step === 0 && (
           <div>
-            <H>Let’s set up your marketing.</H>
-            <P>Pick your industry — this teaches Amplo your language, your best content angles, and where to post.</P>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px,1fr))", gap: 10, marginTop: 24 }}>
-              {NICHES.map((n) => (
-                <button key={n.id} onClick={() => { setNicheId(n.id); if (!businessName) setBusinessName(""); }} className="card"
-                  style={{ padding: 16, textAlign: "left", cursor: "pointer", borderColor: nicheId === n.id ? "var(--brand)" : "var(--line)", background: nicheId === n.id ? "var(--brand-soft)" : "var(--surface)" }}>
-                  <div style={{ fontSize: 26 }}>{n.emoji}</div>
-                  <div style={{ fontWeight: 800, marginTop: 6 }}>{n.label}</div>
-                  <div style={{ fontSize: 12, color: "var(--faint)", fontWeight: 600 }}>{n.audience}</div>
+            <H>What do you do?</H>
+            <P>Amplo is built for real estate and mortgage pros. Pick one and we’ll set everything up around it.</P>
+            <div style={{ display: "grid", gap: 12, marginTop: 26 }}>
+              {SETUP_ROLES.map((r) => (
+                <button key={r.id} onClick={() => chooseRole(r.id)} className="card"
+                  style={{ padding: 22, textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", gap: 18 }}>
+                  <span style={{ fontSize: 40, lineHeight: 1 }}>{r.emoji}</span>
+                  <span style={{ flex: 1 }}>
+                    <span style={{ fontWeight: 850, fontSize: 20, display: "block" }}>{r.label}</span>
+                    <span style={{ color: "var(--muted)", fontSize: 14, fontWeight: 500 }}>{r.blurb}</span>
+                  </span>
+                  <span style={{ color: "var(--brand)", fontSize: 22, fontWeight: 800 }}>→</span>
                 </button>
               ))}
             </div>
-            <Field label="Business name" style={{ marginTop: 24 }}>
-              <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder={niche?.sample.name || "Your business"} style={inputStyle} />
-            </Field>
-            <Field label="City (for local SEO)">
-              <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Philadelphia, PA" style={inputStyle} />
-            </Field>
           </div>
         )}
 
-        {step === 1 && (
+        {/* STEP 1 — business basics */}
+        {step === 1 && role && (
           <div>
-            <H>How should you sound?</H>
-            <P>Amplo writes in your voice. Pick a few words that describe your brand — you can fine-tune anytime.</P>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 24 }}>
-              {TONES.map((t) => (
-                <button key={t} onClick={() => toggle(tone, t, setTone)} className={`chip${tone.includes(t) ? " on" : ""}`} style={{ cursor: "pointer", padding: "10px 16px", fontSize: 14 }}>{t}</button>
-              ))}
-            </div>
-            <Field label="Anything Amplo should know? (offers, personality, what makes you different)" style={{ marginTop: 28 }}>
-              <textarea value={about} onChange={(e) => setAbout(e.target.value)} rows={4} placeholder="e.g. We’re a family-owned practice, gentle with nervous patients, first cleaning free for new patients." style={{ ...inputStyle, resize: "vertical" }} />
+            <H>Tell us about you.</H>
+            <P>Just two things — this personalizes every post. Takes 15 seconds.</P>
+            <Field label={role.id === "loanOfficer" ? "Your name or team" : "Your name or brokerage"} style={{ marginTop: 26 }}>
+              <input autoFocus value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder={role.id === "loanOfficer" ? "e.g. Alex Rivera — Summit Home Lending" : "e.g. Alex Rivera — Keller Williams"} style={inputStyle} />
             </Field>
+            <Field label="Your market / city (for local reach)">
+              <input value={market} onChange={(e) => setMarket(e.target.value)} placeholder="e.g. Philadelphia, PA" style={inputStyle} />
+            </Field>
+            <NavRow onBack={() => setStep(0)} onNext={() => setStep(2)} canNext={canContinue} />
           </div>
         )}
 
-        {step === 2 && (
+        {/* STEP 2 — content themes */}
+        {step === 2 && role && (
           <div>
-            <H>What do you want Amplo to make?</H>
-            <P>Choose the content types and platforms. Amplo builds a full calendar around your picks.</P>
-            <div style={{ fontSize: 13, fontWeight: 750, color: "var(--faint)", marginTop: 24, marginBottom: 10 }}>CONTENT</div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px,1fr))", gap: 10 }}>
-              {CONTENT_TYPES.map((t) => (
-                <button key={t.id} onClick={() => toggle(types, t.id, setTypes)} className="card"
-                  style={{ padding: 14, textAlign: "left", cursor: "pointer", borderColor: types.includes(t.id) ? "var(--brand)" : "var(--line)", background: types.includes(t.id) ? "var(--brand-soft)" : "var(--surface)", display: "flex", gap: 10, alignItems: "flex-start" }}>
-                  <span style={{ fontSize: 20 }}>{t.emoji}</span>
-                  <span><span style={{ fontWeight: 800, fontSize: 14 }}>{t.label}</span><br /><span style={{ fontSize: 12, color: "var(--faint)", fontWeight: 500 }}>{t.blurb}</span></span>
-                </button>
-              ))}
+            <H>What should Amplo post about?</H>
+            <P>We pre-picked the winners for {role.label.toLowerCase()}s. Tap to add or remove — you can change these anytime.</P>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px,1fr))", gap: 10, marginTop: 24 }}>
+              {role.themes.map((t) => {
+                const on = themes.includes(t.id);
+                return (
+                  <button key={t.id} onClick={() => toggleTheme(t.id)} className="card"
+                    style={{ padding: 14, textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", gap: 11, borderColor: on ? "var(--brand)" : "var(--line)", background: on ? "var(--brand-soft)" : "var(--surface)" }}>
+                    <span style={{ fontSize: 20 }}>{t.emoji}</span>
+                    <span style={{ flex: 1, fontWeight: 750, fontSize: 14 }}>{t.label}</span>
+                    <span style={{ width: 20, height: 20, borderRadius: 6, display: "grid", placeItems: "center", background: on ? "var(--brand)" : "transparent", border: on ? "none" : "1.5px solid var(--line)", color: "#fff", fontSize: 13, fontWeight: 900 }}>{on ? "✓" : ""}</span>
+                  </button>
+                );
+              })}
             </div>
-            <div style={{ fontSize: 13, fontWeight: 750, color: "var(--faint)", marginTop: 24, marginBottom: 10 }}>PLATFORMS</div>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              {PLATFORMS.map((p) => (
-                <button key={p} onClick={() => toggle(platforms, p, setPlatforms)} className={`chip${platforms.includes(p) ? " on" : ""}`} style={{ cursor: "pointer", padding: "10px 16px", fontSize: 14 }}>{p}</button>
-              ))}
-            </div>
+            <NavRow onBack={() => setStep(1)} onNext={() => setStep(3)} canNext={canContinue} />
           </div>
         )}
 
+        {/* STEP 3 — voice + frequency */}
         {step === 3 && (
           <div>
-            <H>Connect your accounts.</H>
-            <P>This is what makes it automatic — Amplo pulls your Google reviews and posts straight to your pages. (Demo: connections are simulated.)</P>
+            <H>How should it sound — and how often?</H>
+            <P>Set the vibe and the pace. Amplo handles the rest.</P>
+
+            <div style={{ fontSize: 13, fontWeight: 800, color: "var(--faint)", marginTop: 26, marginBottom: 10, textTransform: "uppercase", letterSpacing: ".05em" }}>Voice</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px,1fr))", gap: 10 }}>
+              {VOICES.map((v) => {
+                const on = voice === v.id;
+                return (
+                  <button key={v.id} onClick={() => setVoice(v.id)} className="card"
+                    style={{ padding: 14, textAlign: "center", cursor: "pointer", borderColor: on ? "var(--brand)" : "var(--line)", background: on ? "var(--brand-soft)" : "var(--surface)" }}>
+                    <div style={{ fontSize: 22 }}>{v.emoji}</div>
+                    <div style={{ fontWeight: 800, fontSize: 14, marginTop: 4 }}>{v.label}</div>
+                    <div style={{ fontSize: 11.5, color: "var(--faint)", fontWeight: 500 }}>{v.hint}</div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ fontSize: 13, fontWeight: 800, color: "var(--faint)", marginTop: 26, marginBottom: 10, textTransform: "uppercase", letterSpacing: ".05em" }}>How often</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px,1fr))", gap: 10 }}>
+              {FREQUENCIES.map((f) => {
+                const on = frequency === f.id;
+                return (
+                  <button key={f.id} onClick={() => setFrequency(f.id)} className="card"
+                    style={{ padding: 16, textAlign: "left", cursor: "pointer", position: "relative", borderColor: on ? "var(--brand)" : "var(--line)", background: on ? "var(--brand-soft)" : "var(--surface)" }}>
+                    {f.recommended && <span style={{ position: "absolute", top: -9, right: 12, background: "var(--brand)", color: "#fff", fontSize: 10, fontWeight: 850, textTransform: "uppercase", letterSpacing: ".05em", padding: "3px 8px", borderRadius: 999 }}>Recommended</span>}
+                    <div style={{ fontWeight: 800, fontSize: 15 }}>{f.label}</div>
+                    <div style={{ fontSize: 12.5, color: "var(--muted)", fontWeight: 600, marginTop: 2 }}>{f.hint}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <NavRow onBack={() => setStep(2)} onNext={() => setStep(4)} canNext />
+          </div>
+        )}
+
+        {/* STEP 4 — connect + finish */}
+        {step === 4 && role && (
+          <div>
+            <H>Last step — connect your accounts.</H>
+            <P>This is what makes it automatic: Amplo pulls your Google reviews and posts to your pages. (Demo: connections are simulated.)</P>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 24 }}>
-              <ConnectRow name="Google Business" desc="Read reviews · publish local posts" color="#4285F4" letter="G" />
-              <ConnectRow name="Instagram" desc="Publish posts, reels & stories" color="#E4405F" letter="I" />
-              <ConnectRow name="Facebook" desc="Publish to your business page" color="#1877F2" letter="F" />
+              <ConnectRow name="Google Business" desc="Reviews + local posts" color="#4285F4" letter="G" done={!!connected.google} onDone={() => setConnected((c) => ({ ...c, google: true }))} />
+              <ConnectRow name="Instagram" desc="Posts, reels & stories" color="#E4405F" letter="I" done={!!connected.ig} onDone={() => setConnected((c) => ({ ...c, ig: true }))} />
+              <ConnectRow name="Facebook" desc="Your business page" color="#1877F2" letter="F" done={!!connected.fb} onDone={() => setConnected((c) => ({ ...c, fb: true }))} />
             </div>
-          </div>
-        )}
 
-        {step === 4 && (
-          <div style={{ textAlign: "center", paddingTop: 20 }}>
-            <div style={{ fontSize: 54 }}>🎉</div>
-            <H>You’re set, {businessName || "friend"}.</H>
-            <P style={{ marginInline: "auto" }}>Amplo is building your first month of content right now. Head to your dashboard to review the calendar and flip on autopilot.</P>
-            <div style={{ display: "inline-flex", gap: 12, marginTop: 28, flexWrap: "wrap", justifyContent: "center" }}>
-              <button onClick={finish} disabled={saving} className="btn btn-primary">{saving ? "Setting up…" : "Go to my dashboard →"}</button>
+            <div className="card" style={{ padding: 16, marginTop: 22, background: "var(--surface-2)", display: "flex", gap: 12, alignItems: "flex-start" }}>
+              <span style={{ fontSize: 20 }}>✨</span>
+              <div style={{ fontSize: 13.5, color: "var(--muted)", fontWeight: 500 }}>
+                You can skip connecting for now and still see your first week of posts. Connect later from the dashboard to turn on full autopilot.
+              </div>
             </div>
-          </div>
-        )}
 
-        {/* nav buttons */}
-        {step < 4 && (
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 40 }}>
-            <button onClick={() => setStep((s) => Math.max(0, s - 1))} className="btn btn-ghost" style={{ visibility: step === 0 ? "hidden" : "visible" }}>← Back</button>
-            <button onClick={() => setStep((s) => s + 1)} disabled={!canNext} className="btn btn-primary" style={{ opacity: canNext ? 1 : 0.5, cursor: canNext ? "pointer" : "not-allowed" }}>
-              {step === 3 ? "Finish setup" : "Continue"} →
-            </button>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 28, gap: 12 }}>
+              <button onClick={() => setStep(3)} className="btn btn-ghost">← Back</button>
+              <button onClick={finish} disabled={saving} className="btn btn-primary" style={{ minWidth: 190, justifyContent: "center" }}>
+                {saving ? "Building your posts…" : "Finish & see my posts →"}
+              </button>
+            </div>
           </div>
         )}
       </main>
@@ -176,11 +228,12 @@ export default function Onboarding() {
   );
 }
 
+/* ---------- small pieces ---------- */
 function H({ children }: { children: React.ReactNode }) {
-  return <h1 style={{ fontSize: "clamp(26px,3.4vw,36px)", letterSpacing: "-.03em", fontWeight: 800, marginTop: 10 }}>{children}</h1>;
+  return <h1 style={{ fontSize: "clamp(26px,3.6vw,36px)", letterSpacing: "-.03em", fontWeight: 800, marginTop: 10, textWrap: "balance" }}>{children}</h1>;
 }
-function P({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
-  return <p style={{ color: "var(--muted)", fontSize: 16, marginTop: 10, fontWeight: 500, maxWidth: 520, ...style }}>{children}</p>;
+function P({ children }: { children: React.ReactNode }) {
+  return <p style={{ color: "var(--muted)", fontSize: 16, marginTop: 10, fontWeight: 500, maxWidth: 520 }}>{children}</p>;
 }
 function Field({ label, children, style }: { label: string; children: React.ReactNode; style?: React.CSSProperties }) {
   return (
@@ -190,19 +243,26 @@ function Field({ label, children, style }: { label: string; children: React.Reac
     </label>
   );
 }
+function NavRow({ onBack, onNext, canNext }: { onBack: () => void; onNext: () => void; canNext: boolean }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 32 }}>
+      <button onClick={onBack} className="btn btn-ghost">← Back</button>
+      <button onClick={onNext} disabled={!canNext} className="btn btn-primary" style={{ opacity: canNext ? 1 : 0.5, cursor: canNext ? "pointer" : "not-allowed", minWidth: 130, justifyContent: "center" }}>Continue →</button>
+    </div>
+  );
+}
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  padding: "12px 14px",
+  padding: "13px 15px",
   borderRadius: 12,
   border: "1px solid var(--line)",
   background: "var(--surface)",
   color: "var(--ink)",
-  fontSize: 15,
+  fontSize: 15.5,
   fontFamily: "inherit",
 };
 
-function ConnectRow({ name, desc, color, letter }: { name: string; desc: string; color: string; letter: string }) {
-  const [connected, setConnected] = useState(false);
+function ConnectRow({ name, desc, color, letter, done, onDone }: { name: string; desc: string; color: string; letter: string; done: boolean; onDone: () => void }) {
   return (
     <div className="card" style={{ padding: 16, display: "flex", alignItems: "center", gap: 14 }}>
       <span style={{ width: 40, height: 40, borderRadius: 10, background: color, color: "#fff", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 18 }}>{letter}</span>
@@ -210,8 +270,8 @@ function ConnectRow({ name, desc, color, letter }: { name: string; desc: string;
         <div style={{ fontWeight: 800, fontSize: 15 }}>{name}</div>
         <div style={{ fontSize: 12.5, color: "var(--faint)", fontWeight: 600 }}>{desc}</div>
       </div>
-      <button onClick={() => setConnected(true)} className={connected ? "btn btn-ghost" : "btn btn-primary"} style={{ padding: "8px 16px", fontSize: 13.5 }}>
-        {connected ? "✓ Connected" : "Connect"}
+      <button onClick={onDone} className={done ? "btn btn-ghost" : "btn btn-primary"} style={{ padding: "8px 16px", fontSize: 13.5 }}>
+        {done ? "✓ Connected" : "Connect"}
       </button>
     </div>
   );

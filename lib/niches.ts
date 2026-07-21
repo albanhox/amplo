@@ -65,6 +65,31 @@ export const NICHES: Niche[] = [
     },
   },
   {
+    id: "loanOfficer",
+    emoji: "🏦",
+    label: "Loan Officer",
+    audience: "mortgage loan officers",
+    platforms: ["Instagram", "Facebook", "LinkedIn", "Google Business"],
+    toneWords: ["trustworthy", "clear", "approachable"],
+    angles: ["rate & market updates", "first-time buyer education", "loan program spotlights", "myth busting", "client closings"],
+    sample: { name: "Summit Home Lending", handle: "@summitlends", initials: "S" },
+    seedPosts: {
+      tip: "Waiting for rates to drop before you buy? 📉 Here's the math most people miss: marrying the house and dating the rate often beats waiting. Let's run YOUR numbers 👇 #MortgageTips #FirstTimeBuyer",
+      video: "HOOK: \"You don't need 20% down.\" — [talking head] Break down 3%, 3.5%, and 0-down options + who qualifies. CTA: \"DM me QUALIFY for a free 10-min check.\"",
+      review: "Closings like this are the whole job. 🔑 Huge congrats on the keys! Grateful you trusted us with the loan. Thinking about buying? Let's see what you qualify for. ⭐⭐⭐⭐⭐ #HappyHomeowners",
+      offer: "Free pre-approval this week — real numbers, no credit ding to start. 🏡 Know exactly what you can afford before you shop. DM PREAPPROVAL to begin. #MortgagePreApproval",
+      seo: "First-time home buyer programs in [city] for 2026 — down payment assistance, credit minimums, and who qualifies. #FirstTimeBuyer #HomeLoans",
+    },
+    reviewExample: {
+      author: "Jasmine R.",
+      initials: "J",
+      stars: 5,
+      text: "Everyone said we couldn't buy yet. This team got us pre-approved in 48 hours and closed early. Explained every step in plain English.",
+      generatedPost:
+        "\"Everyone said we couldn't buy yet.\" 🙌 Not on our watch — pre-approved in 48 hours and closed early for Jasmine & family. Been told no before? Let's take a real look. ⭐⭐⭐⭐⭐ #FirstTimeBuyer #MortgageLoans",
+    },
+  },
+  {
     id: "dentist",
     emoji: "🦷",
     label: "Dentist",
