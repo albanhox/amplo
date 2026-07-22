@@ -56,9 +56,9 @@ export default function Dashboard() {
             <span style={{ fontSize: 13.5, fontWeight: 700 }} className="md-nav">{account.name || brand.businessName}</span>
             <ThemeToggle />
             <button onClick={logout} className="btn btn-ghost" style={{ padding: "8px 13px", fontSize: 13 }}>Log out</button>
-            <span style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(145deg,var(--spruce),var(--spruce-2))", color: "#fff", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 14 }}>
+            <Link href="/account" title="Account settings" style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(145deg,var(--spruce),var(--spruce-2))", color: "#fff", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 14, textDecoration: "none" }}>
               {(account.name || brand.businessName || "A").slice(0, 1).toUpperCase()}
-            </span>
+            </Link>
           </div>
         </div>
       </header>
