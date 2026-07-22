@@ -6,9 +6,10 @@ import { Wordmark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NICHES, getNiche, type ContentType } from "@/lib/niches";
 import { PLANS } from "@/lib/pricing";
+import { BrandKit } from "@/components/BrandKit";
 import type { BrandProfile, GeneratedPost } from "@/lib/agents/types";
 
-type Tab = "studio" | "calendar" | "queue" | "reviews" | "growth" | "settings";
+type Tab = "studio" | "calendar" | "queue" | "reviews" | "brand" | "growth" | "settings";
 
 const DEFAULT_BRAND: BrandProfile = {
   nicheId: "realtor",
@@ -58,6 +59,7 @@ export default function Dashboard() {
             ["calendar", "📅 Calendar"],
             ["queue", "🗂️ Queue"],
             ["reviews", "⭐ Reviews"],
+            ["brand", "🎨 Brand & Templates"],
             ["growth", "📈 Growth"],
             ["settings", "⚙️ Connect & Billing"],
           ] as [Tab, string][]).map(([id, label]) => (
@@ -69,6 +71,7 @@ export default function Dashboard() {
         {tab === "calendar" && <Calendar />}
         {tab === "queue" && <Queue niche={niche} />}
         {tab === "reviews" && <Reviews brand={brand} />}
+        {tab === "brand" && <BrandKit brand={brand} />}
         {tab === "growth" && <Growth />}
         {tab === "settings" && <Settings brand={brand} />}
       </div>

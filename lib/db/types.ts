@@ -36,6 +36,12 @@ export interface Brand {
   platforms: string[];
   contentTypes: ContentType[];
   accent?: string;
+  /** Brand kit — logo stored as a data URL (swap for object storage in prod). */
+  logoDataUrl?: string;
+  /** Selected post template ids (see lib/templates). */
+  templateIds?: string[];
+  /** User-uploaded reference photos / posts they liked. */
+  media?: { id: string; dataUrl?: string; note?: string }[];
   autopilot: boolean;
   connections: {
     google?: Connection;
