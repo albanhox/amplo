@@ -22,18 +22,18 @@ export interface Plan {
 export const PLANS: Plan[] = [
   {
     id: "starter",
-    name: "Starter",
-    tagline: "For the solo pro getting consistent at last.",
+    name: "Free",
+    tagline: "A taste of Amplo — see it write for your business.",
     monthly: 0,
     yearlyMonthly: 0,
-    cta: "Start free",
-    postsPerMonth: 12,
-    platforms: 1,
+    cta: "Try it free",
+    postsPerMonth: 3,
+    platforms: 0,
     features: [
-      "12 AI posts / month",
-      "1 social platform",
-      "Content studio + brand voice",
-      "Manual approve & post",
+      "3 sample AI posts to preview your voice",
+      "Explore the dashboard & templates",
+      "Draft only — no scheduling or publishing",
+      "Reviews → posts, autopilot & account connections are paid",
     ],
   },
   {

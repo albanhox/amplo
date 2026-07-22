@@ -58,7 +58,7 @@ export default function Onboarding() {
     setStep(4);
   }
 
-  async function finish() {
+  async function finish(startTrial: boolean) {
     if (!role) return;
     const themeLabels = role.themes.filter((t) => themes.includes(t.id)).map((t) => t.label);
     const voiceLabel = VOICES.find((v) => v.id === voice)?.label ?? "Friendly";
@@ -74,7 +74,8 @@ export default function Onboarding() {
       about: `Focus topics: ${themeLabels.join(", ")}. Voice: ${voiceLabel}. Posting ${perWeek}x/week.`,
       themes: themeLabels,
       postsPerWeek: perWeek,
-      planMonthly: quote.monthly,
+      planMonthly: startTrial ? quote.monthly : 0,
+      freePlan: !startTrial,
     };
     try {
       localStorage.setItem("amplo-brand", JSON.stringify(brand));
@@ -91,8 +92,15 @@ export default function Onboarding() {
     } catch {
       /* dashboard still works from localStorage */
     }
-    // Start the subscription for the chosen amount (14-day trial). Simulated
-    // without a Stripe key; opens real Stripe Checkout once keys are set.
+
+    // Free plan: skip checkout, land on the limited dashboard.
+    if (!startTrial) {
+      router.push("/dashboard?welcome=1&plan=free");
+      return;
+    }
+
+    // Paid: start the subscription for the chosen amount (14-day trial).
+    // Simulated without a Stripe key; opens real Stripe Checkout once keys are set.
     try {
       const co = await fetch("/api/billing/checkout", {
         method: "POST",
@@ -235,6 +243,11 @@ export default function Onboarding() {
               <PlanBuilder initial={planSel} onChange={(s, q) => { setPlanSel(s); setQuote(q); }} />
             </div>
             <NavRow onBack={() => setStep(3)} onNext={() => setStep(5)} canNext />
+            <div style={{ textAlign: "center", marginTop: 18 }}>
+              <button onClick={() => finish(false)} disabled={saving} style={{ background: "none", border: "none", color: "var(--muted)", fontWeight: 650, fontSize: 13.5, cursor: "pointer", textDecoration: "underline" }}>
+                Not ready? Continue on the Free plan — 3 preview posts, draft-only
+              </button>
+            </div>
           </div>
         )}
 
@@ -258,7 +271,7 @@ export default function Onboarding() {
 
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 28, gap: 12 }}>
               <button onClick={() => setStep(4)} className="btn btn-ghost">← Back</button>
-              <button onClick={finish} disabled={saving} className="btn btn-primary" style={{ minWidth: 210, justifyContent: "center" }}>
+              <button onClick={() => finish(true)} disabled={saving} className="btn btn-primary" style={{ minWidth: 210, justifyContent: "center" }}>
                 {saving ? "Setting up…" : `Start free trial → $${quote.monthly}/mo`}
               </button>
             </div>
