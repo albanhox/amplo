@@ -11,6 +11,25 @@ const STEPS = [
   { n: 3, h: "Approve & autopilot", p: "A full month of content shows up ready to go. Approve with one tap — or let it post on its own. You stay visible without lifting a finger." },
 ];
 
+/**
+ * TODO: swap these placeholder quotes for your REAL customers' words before you
+ * send the site out. Keep the shape the same — quote, name, role.
+ */
+const TESTIMONIALS = [
+  { quote: "I went from posting once a month to every day — without touching a thing. Two listing leads came straight from Instagram last week.", name: "Marcus", role: "Realtor · Philadelphia" },
+  { quote: "It turns my closings and reviews into posts automatically. My past clients keep seeing me, and referrals are up.", name: "Jasmine", role: "Loan Officer · South Jersey" },
+  { quote: "Setup took five minutes and it sounds exactly like me. Cheaper than the agency I fired — and more consistent.", name: "Devin", role: "Realtor · Cherry Hill" },
+];
+
+const FAQS = [
+  { q: "Do I have to write or design anything?", a: "No. You pick your niche and vibe once, and Amplo writes the captions, designs the posts with your logo and colors, and schedules everything. You just approve — or let autopilot handle it." },
+  { q: "Will it really post for me automatically?", a: "Yes. On a paid plan you can connect Instagram, Facebook, and Google Business and switch on autopilot, or keep approval-first control. Free accounts can preview content but can't publish." },
+  { q: "What happens with my Google reviews?", a: "Connect Google Business and Amplo watches for new reviews. Every 5-star review is automatically turned into a branded post that thanks the customer and invites new ones." },
+  { q: "Do I need to be tech-savvy?", a: "Not at all. Setup takes about a minute — pick your role, add your name and market, choose your look, done. It's built for busy agents and loan officers, not marketers." },
+  { q: "Can I cancel anytime?", a: "Yes. Every plan is month-to-month with a 14-day free trial. Cancel from your account settings whenever you like — no contracts." },
+  { q: "Will the posts actually look like my brand?", a: "Yes. Upload your logo, set your brand color, pick your templates, and add your own photos. Every post comes out on-brand." },
+];
+
 export default function Home() {
   const demoNiche = NICHES[0];
 
@@ -125,11 +144,48 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TESTIMONIALS */}
+      <section style={{ padding: "20px 0 76px" }}>
+        <div className="wrap">
+          <SectionHead eyebrow="Loved by local pros" title="Consistent marketing, finally handled." sub="What realtors and loan officers say once Amplo is running in the background." />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px,1fr))", gap: 16 }}>
+            {TESTIMONIALS.map((t) => (
+              <div key={t.name} className="card" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 14 }}>
+                <div style={{ color: "var(--gold)", fontSize: 15, letterSpacing: 1 }}>★★★★★</div>
+                <p style={{ fontSize: 15.5, fontWeight: 500, lineHeight: 1.55, flex: 1 }}>“{t.quote}”</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
+                  <span style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(145deg,var(--spruce),var(--spruce-2))", color: "#fff", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 15 }}>{t.name.slice(0, 1)}</span>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: 14 }}>{t.name}</div>
+                    <div style={{ fontSize: 12.5, color: "var(--faint)", fontWeight: 600 }}>{t.role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* PRICING */}
       <section id="pricing" style={{ padding: "20px 0 76px" }}>
         <div className="wrap">
           <SectionHead eyebrow="Pricing" title="Flat monthly plans. Cancel anytime." sub="Start free. Upgrade when you’re ready for more content and full autopilot. Every plan is month-to-month — no contracts, no per-seat games." />
           <PricingCards />
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section style={{ padding: "20px 0 76px" }}>
+        <div className="wrap" style={{ maxWidth: 780 }}>
+          <SectionHead eyebrow="FAQ" title="Everything you’re wondering." sub="Short answers to what realtors and loan officers ask most." />
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {FAQS.map((f) => (
+              <details key={f.q} className="card" style={{ padding: "16px 20px" }}>
+                <summary style={{ fontWeight: 750, fontSize: 15.5, cursor: "pointer", listStyle: "none" }}>{f.q}</summary>
+                <p style={{ color: "var(--muted)", fontSize: 14.5, marginTop: 10, fontWeight: 500, lineHeight: 1.6 }}>{f.a}</p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -157,10 +213,12 @@ export default function Home() {
             <a href="#how">How it works</a>
             <a href="#reviews">Reviews → Posts</a>
             <a href="#pricing">Pricing</a>
+            <a href="#">FAQ</a>
+            <a href="mailto:hello@amplo.co">Contact</a>
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
           </div>
-          <div>Local marketing on autopilot.</div>
+          <div>© {new Date().getFullYear()} Amplo · Local marketing on autopilot.</div>
         </div>
       </footer>
     </>

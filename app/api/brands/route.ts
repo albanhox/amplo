@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { brands, createAccount } from "@/lib/db/repo";
 import { newId } from "@/lib/db/store";
 import { accountFromRequest } from "@/lib/auth";
+import { isPaidAccount, UPGRADE_MESSAGE } from "@/lib/plan";
 import type { Brand } from "@/lib/db/types";
 
 export const runtime = "nodejs";
@@ -52,6 +53,15 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
   if (!body?.id) return NextResponse.json({ error: "id is required" }, { status: 400 });
+
+  // Autopilot is a paid feature.
+  if (body.autopilot === true) {
+    const account = accountFromRequest(req);
+    if (account && !isPaidAccount(account)) {
+      return NextResponse.json({ error: UPGRADE_MESSAGE, upgrade: true }, { status: 402 });
+    }
+  }
+
   const { id, ...patch } = body;
   const updated = brands.update(id, patch);
   if (!updated) return NextResponse.json({ error: "Brand not found" }, { status: 404 });

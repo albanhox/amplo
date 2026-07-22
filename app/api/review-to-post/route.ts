@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { reviewToPost } from "@/lib/agents/reviewAgent";
+import { accountFromRequest } from "@/lib/auth";
+import { isPaidAccount, UPGRADE_MESSAGE } from "@/lib/plan";
 import type { BrandProfile, ReviewInput } from "@/lib/agents/types";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  // Reviews → posts is a paid feature.
+  const account = accountFromRequest(req);
+  if (account && !isPaidAccount(account)) {
+    return NextResponse.json({ error: UPGRADE_MESSAGE, upgrade: true }, { status: 402 });
+  }
+
   let body: { brand: BrandProfile; review: ReviewInput };
   try {
     body = await req.json();

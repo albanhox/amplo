@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isPaidAccount } from "@/lib/plan";
 
 export interface AuthAccount {
   id: string;
@@ -46,5 +47,5 @@ export function useAuth(opts?: { required?: boolean; redirectTo?: string; next?:
     window.location.href = "/";
   }
 
-  return { account, loading, logout };
+  return { account, loading, logout, isPaid: isPaidAccount(account) };
 }

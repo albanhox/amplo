@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createCheckout } from "@/lib/billing/stripe";
 import { createAccount } from "@/lib/db/repo";
+import { accountFromRequest } from "@/lib/auth";
 import type { PlanId } from "@/lib/db/types";
 
 export const runtime = "nodejs";
@@ -14,8 +15,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
   const plan = body.plan || "growth";
-  const email = body.email || "demo@amplo.co";
-  const account = createAccount(email);
+  // Charge the logged-in account; fall back to demo only when anonymous.
+  const account = accountFromRequest(req) || createAccount(body.email || "demo@amplo.co");
+  const email = account.email;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;
 
   try {

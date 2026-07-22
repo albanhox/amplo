@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { googleAuthUrl, isGoogleConfigured, exchangeGoogleCode } from "@/lib/integrations/google";
 import { brands } from "@/lib/db/repo";
+import { accountFromRequest } from "@/lib/auth";
+import { isPaidAccount } from "@/lib/plan";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Start the Google Business OAuth flow. /api/connect/google?brandId=... */
 export async function GET(req: NextRequest) {
+  const account = accountFromRequest(req);
+  if (account && !isPaidAccount(account)) {
+    return NextResponse.redirect(new URL("/dashboard?upgrade=connect", req.url));
+  }
   const brandId = req.nextUrl.searchParams.get("brandId") || "";
 
   // Demo mode (no credentials): simulate the connection and return.

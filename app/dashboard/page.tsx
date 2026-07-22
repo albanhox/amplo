@@ -21,9 +21,16 @@ const DEFAULT_BRAND: BrandProfile = {
 };
 
 export default function Dashboard() {
-  const { account, loading, logout } = useAuth({ required: true, redirectTo: "/login", next: "/dashboard" });
+  const { account, loading, logout, isPaid } = useAuth({ required: true, redirectTo: "/login", next: "/dashboard" });
   const [brand, setBrand] = useState<BrandProfile>(DEFAULT_BRAND);
   const [tab, setTab] = useState<Tab>("studio");
+  const [upgradeNote, setUpgradeNote] = useState<string | null>(null);
+  const goUpgrade = () => { setTab("settings"); setUpgradeNote("Start your free trial below to unlock this."); };
+
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get("upgrade")) { setTab("settings"); setUpgradeNote("Start your free trial below to unlock connecting your accounts."); }
+  }, []);
 
   useEffect(() => {
     try {
@@ -48,9 +55,15 @@ export default function Dashboard() {
         <div className="wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 64, maxWidth: 1180 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <Link href="/"><Wordmark /></Link>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 750, color: "var(--muted)", border: "1px solid var(--line)", borderRadius: 999, padding: "5px 12px" }}>
-              <span className="pulse" /> Autopilot on
-            </span>
+            {isPaid ? (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 750, color: "var(--muted)", border: "1px solid var(--line)", borderRadius: 999, padding: "5px 12px" }}>
+                <span className="pulse" /> Autopilot ready
+              </span>
+            ) : (
+              <button onClick={goUpgrade} style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 800, color: "#fff", background: "var(--brand)", border: "none", borderRadius: 999, padding: "6px 13px", cursor: "pointer" }}>
+                🔒 Free plan · Upgrade
+              </button>
+            )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ fontSize: 13.5, fontWeight: 700 }} className="md-nav">{account.name || brand.businessName}</span>
@@ -80,20 +93,20 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {tab === "studio" && <Studio brand={brand} />}
+        {tab === "studio" && <Studio brand={brand} isPaid={isPaid} onUpgrade={goUpgrade} />}
         {tab === "calendar" && <Calendar />}
         {tab === "queue" && <Queue niche={niche} />}
-        {tab === "reviews" && <Reviews brand={brand} />}
+        {tab === "reviews" && <Reviews brand={brand} isPaid={isPaid} onUpgrade={goUpgrade} />}
         {tab === "brand" && <BrandKit brand={brand} />}
         {tab === "growth" && <Growth />}
-        {tab === "settings" && <Settings brand={brand} />}
+        {tab === "settings" && <Settings brand={brand} isPaid={isPaid} note={upgradeNote} />}
       </div>
     </div>
   );
 }
 
 /* ---------------- Content Studio ---------------- */
-function Studio({ brand }: { brand: BrandProfile }) {
+function Studio({ brand, isPaid, onUpgrade }: { brand: BrandProfile; isPaid: boolean; onUpgrade: () => void }) {
   const [type, setType] = useState<ContentType>("tip");
   const [topic, setTopic] = useState("");
   const [posts, setPosts] = useState<GeneratedPost[]>([]);
@@ -143,13 +156,13 @@ function Studio({ brand }: { brand: BrandProfile }) {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {posts.length === 0 && !loading && <div className="card" style={{ padding: 30, color: "var(--faint)", textAlign: "center" }}>Generate to see posts.</div>}
-        {posts.map((p, i) => <PostCard key={i} post={p} brand={brand} />)}
+        {posts.map((p, i) => <PostCard key={i} post={p} brand={brand} isPaid={isPaid} onUpgrade={onUpgrade} />)}
       </div>
     </div>
   );
 }
 
-function PostCard({ post, brand }: { post: GeneratedPost; brand: BrandProfile }) {
+function PostCard({ post, brand, isPaid, onUpgrade }: { post: GeneratedPost; brand: BrandProfile; isPaid: boolean; onUpgrade: () => void }) {
   const niche = getNiche(brand.nicheId) || NICHES[0];
   const [status, setStatus] = useState<"draft" | "scheduled">("draft");
   return (
@@ -167,9 +180,13 @@ function PostCard({ post, brand }: { post: GeneratedPost; brand: BrandProfile })
         {post.hashtags?.length ? <span style={{ color: "var(--brand)", fontWeight: 700 }}>{post.hashtags.map((h) => `#${h}`).join(" ")}</span> : null}
       </div>
       <div style={{ display: "flex", gap: 8, padding: "11px 14px", borderTop: "1px solid var(--line-2)" }}>
-        <button onClick={() => setStatus("scheduled")} className="btn btn-primary" style={{ padding: "7px 13px", fontSize: 13 }}>
-          {status === "scheduled" ? "✓ Scheduled" : "Approve & schedule"}
-        </button>
+        {isPaid ? (
+          <button onClick={() => setStatus("scheduled")} className="btn btn-primary" style={{ padding: "7px 13px", fontSize: 13 }}>
+            {status === "scheduled" ? "✓ Scheduled" : "Approve & schedule"}
+          </button>
+        ) : (
+          <button onClick={onUpgrade} className="btn btn-primary" style={{ padding: "7px 13px", fontSize: 13 }}>🔒 Upgrade to publish</button>
+        )}
         <button className="btn btn-ghost" style={{ padding: "7px 13px", fontSize: 13 }}>Edit</button>
       </div>
     </div>
@@ -242,12 +259,13 @@ function Queue({ niche }: { niche: (typeof NICHES)[number] }) {
 }
 
 /* ---------------- Reviews ---------------- */
-function Reviews({ brand }: { brand: BrandProfile }) {
+function Reviews({ brand, isPaid, onUpgrade }: { brand: BrandProfile; isPaid: boolean; onUpgrade: () => void }) {
   const niche = getNiche(brand.nicheId) || NICHES[0];
   const [generated, setGenerated] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function turn() {
+    if (!isPaid) { onUpgrade(); return; }
     setLoading(true);
     try {
       const res = await fetch("/api/review-to-post", {
@@ -255,6 +273,7 @@ function Reviews({ brand }: { brand: BrandProfile }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ brand, review: { author: niche.reviewExample.author, stars: 5, text: niche.reviewExample.text } }),
       });
+      if (res.status === 402) { onUpgrade(); return; }
       const data = await res.json();
       const p = data.post;
       setGenerated(p ? `${p.caption} ${(p.hashtags || []).map((h: string) => "#" + h).join(" ")}` : null);
@@ -276,7 +295,7 @@ function Reviews({ brand }: { brand: BrandProfile }) {
         </div>
         <div style={{ fontSize: 13.5, color: "var(--muted)", fontWeight: 500 }}>“{niche.reviewExample.text}”</div>
         <button onClick={turn} disabled={loading} className="btn btn-primary" style={{ marginTop: 14, padding: "8px 14px", fontSize: 13 }}>
-          {loading ? "Creating…" : "✨ Turn into a post"}
+          {loading ? "Creating…" : isPaid ? "✨ Turn into a post" : "🔒 Upgrade to turn reviews into posts"}
         </button>
       </div>
       <div className="card" style={{ padding: 18 }}>
@@ -329,7 +348,7 @@ interface BrandRecord {
   connections: { google?: { connected: boolean; accountName?: string }; meta?: { connected: boolean; accountName?: string } };
 }
 
-function Settings({ brand }: { brand: BrandProfile }) {
+function Settings({ brand, isPaid, note }: { brand: BrandProfile; isPaid: boolean; note?: string | null }) {
   const [brandId, setBrandId] = useState<string | null>(null);
   const [record, setRecord] = useState<BrandRecord | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
@@ -372,6 +391,7 @@ function Settings({ brand }: { brand: BrandProfile }) {
 
   async function toggleAutopilot() {
     if (!brandId) return;
+    if (!isPaid) { setBanner("🔒 Autopilot is a paid feature — start your free trial below to switch it on."); return; }
     setBusy(true);
     try {
       const res = await fetch("/api/brands", {
@@ -379,6 +399,7 @@ function Settings({ brand }: { brand: BrandProfile }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: brandId, autopilot: !record?.autopilot }),
       });
+      if (res.status === 402) { setBanner("🔒 Autopilot is a paid feature — start your free trial below."); return; }
       if (res.ok) setRecord((await res.json()).brand);
     } finally { setBusy(false); }
   }
@@ -401,6 +422,15 @@ function Settings({ brand }: { brand: BrandProfile }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {!isPaid && (
+        <div className="card" style={{ padding: "14px 16px", borderColor: "var(--brand)", background: "var(--brand-soft)", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+          <span style={{ fontSize: 20 }}>🔒</span>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontWeight: 800, fontSize: 14.5 }}>You're on the Free plan</div>
+            <div style={{ fontSize: 13, color: "var(--muted)", fontWeight: 550 }}>{note || "Publishing, reviews → posts, autopilot, and connections are paid. Start your 14-day free trial below."}</div>
+          </div>
+        </div>
+      )}
       {banner && (
         <div className="card" style={{ padding: "12px 16px", borderColor: "var(--good)", background: "var(--good-soft)", color: "var(--good)", fontWeight: 700, fontSize: 14 }}>{banner}</div>
       )}
@@ -413,8 +443,8 @@ function Settings({ brand }: { brand: BrandProfile }) {
             When on, Amplo plans your calendar, turns new 5★ reviews into posts, and publishes on schedule — hands-free.
           </div>
         </div>
-        <button onClick={toggleAutopilot} disabled={busy || !brandId} className={record?.autopilot ? "btn btn-primary" : "btn btn-ghost"} style={{ opacity: brandId ? 1 : 0.5 }}>
-          {record?.autopilot ? "● Autopilot ON" : "Turn on autopilot"}
+        <button onClick={toggleAutopilot} disabled={busy || !brandId} className={record?.autopilot && isPaid ? "btn btn-primary" : "btn btn-ghost"} style={{ opacity: brandId ? 1 : 0.5 }}>
+          {!isPaid ? "🔒 Upgrade for autopilot" : record?.autopilot ? "● Autopilot ON" : "Turn on autopilot"}
         </button>
       </div>
 
@@ -425,9 +455,9 @@ function Settings({ brand }: { brand: BrandProfile }) {
           Link Google to read reviews & post locally; link Meta to publish to Instagram & Facebook.
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <ConnRow name="Google Business" desc="Reviews + local posts" color="#4285F4" letter="G" connected={!!g}
+          <ConnRow name="Google Business" desc="Reviews + local posts" color="#4285F4" letter="G" connected={!!g} locked={!isPaid}
             href={brandId ? `/api/connect/google?brandId=${brandId}` : undefined} />
-          <ConnRow name="Instagram + Facebook" desc="Publish to your pages" color="#E4405F" letter="M" connected={!!m}
+          <ConnRow name="Instagram + Facebook" desc="Publish to your pages" color="#E4405F" letter="M" connected={!!m} locked={!isPaid}
             href={brandId ? `/api/connect/meta?brandId=${brandId}` : undefined} />
         </div>
       </div>
@@ -457,7 +487,7 @@ function Settings({ brand }: { brand: BrandProfile }) {
   );
 }
 
-function ConnRow({ name, desc, color, letter, connected, href }: { name: string; desc: string; color: string; letter: string; connected: boolean; href?: string }) {
+function ConnRow({ name, desc, color, letter, connected, href, locked }: { name: string; desc: string; color: string; letter: string; connected: boolean; href?: string; locked?: boolean }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 14px", border: "1px solid var(--line-2)", borderRadius: 13, background: "var(--surface-2)" }}>
       <span style={{ width: 40, height: 40, borderRadius: 10, background: color, color: "#fff", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 18 }}>{letter}</span>
@@ -467,6 +497,8 @@ function ConnRow({ name, desc, color, letter, connected, href }: { name: string;
       </div>
       {connected ? (
         <span style={{ fontSize: 12.5, fontWeight: 800, color: "var(--good)", background: "var(--good-soft)", padding: "8px 14px", borderRadius: 10 }}>✓ Connected</span>
+      ) : locked ? (
+        <span style={{ fontSize: 12.5, fontWeight: 800, color: "var(--muted)", background: "var(--surface-3)", padding: "8px 14px", borderRadius: 10 }}>🔒 Paid</span>
       ) : (
         <a href={href} className="btn btn-primary" style={{ padding: "8px 16px", fontSize: 13.5, pointerEvents: href ? "auto" : "none", opacity: href ? 1 : 0.5 }}>Connect</a>
       )}
