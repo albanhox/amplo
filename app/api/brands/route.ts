@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { brands, createAccount } from "@/lib/db/repo";
 import { newId } from "@/lib/db/store";
+import { accountFromRequest } from "@/lib/auth";
 import type { Brand } from "@/lib/db/types";
 
 export const runtime = "nodejs";
@@ -18,7 +19,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "nicheId and businessName are required" }, { status: 400 });
   }
 
-  const account = createAccount(body.email || "demo@amplo.co");
+  // Prefer the logged-in account; fall back to demo for anonymous use.
+  const account = accountFromRequest(req) || createAccount(body.email || "demo@amplo.co");
   const brand: Brand = {
     id: newId("brand"),
     accountId: account.id,

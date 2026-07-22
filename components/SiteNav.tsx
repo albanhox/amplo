@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Wordmark } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
+import { NavAuth } from "./NavAuth";
 
 export function SiteNav() {
   return (
@@ -24,9 +25,7 @@ export function SiteNav() {
         </nav>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <ThemeToggle />
-          <Link href="/onboarding" className="btn btn-primary" style={{ padding: "9px 15px", fontSize: 13.5 }}>
-            Start free
-          </Link>
+          <NavAuth />
         </div>
       </div>
     </header>

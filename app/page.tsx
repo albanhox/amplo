@@ -31,7 +31,7 @@ export default function Home() {
               reviews into content, and keeping you visible. Pick your niche, set it once, and it just runs.
             </p>
             <div style={{ display: "flex", gap: 12, marginTop: 30, flexWrap: "wrap" }}>
-              <Link href="/onboarding" className="btn btn-primary">Start free — no card →</Link>
+              <Link href="/signup" className="btn btn-primary">Start free — no card →</Link>
               <a href="#how" className="btn btn-ghost">See how it works</a>
             </div>
             <div style={{ marginTop: 26, fontSize: 13, color: "var(--faint)", fontWeight: 600 }}>
@@ -143,7 +143,7 @@ export default function Home() {
               Give Amplo 10 minutes today, and never worry about your marketing again. Your first month of content is on us.
             </p>
             <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 28, flexWrap: "wrap" }}>
-              <Link href="/onboarding" className="btn btn-primary">Start free — no card →</Link>
+              <Link href="/signup" className="btn btn-primary">Start free — no card →</Link>
               <a href="#how" className="btn btn-ghost">Book a walkthrough</a>
             </div>
           </div>

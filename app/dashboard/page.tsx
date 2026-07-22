@@ -7,6 +7,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { NICHES, getNiche, type ContentType } from "@/lib/niches";
 import { PLANS } from "@/lib/pricing";
 import { BrandKit } from "@/components/BrandKit";
+import { GettingStarted } from "@/components/GettingStarted";
+import { useAuth } from "@/components/useAuth";
 import type { BrandProfile, GeneratedPost } from "@/lib/agents/types";
 
 type Tab = "studio" | "calendar" | "queue" | "reviews" | "brand" | "growth" | "settings";
@@ -19,6 +21,7 @@ const DEFAULT_BRAND: BrandProfile = {
 };
 
 export default function Dashboard() {
+  const { account, loading, logout } = useAuth({ required: true, redirectTo: "/login", next: "/dashboard" });
   const [brand, setBrand] = useState<BrandProfile>(DEFAULT_BRAND);
   const [tab, setTab] = useState<Tab>("studio");
 
@@ -31,6 +34,14 @@ export default function Dashboard() {
 
   const niche = getNiche(brand.nicheId) || NICHES[0];
 
+  if (loading || !account) {
+    return (
+      <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--faint)", fontWeight: 600 }}>
+        Loading your dashboard…
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <header style={{ borderBottom: "1px solid var(--line-2)", position: "sticky", top: 0, background: "var(--bg)", zIndex: 40 }}>
@@ -42,16 +53,18 @@ export default function Dashboard() {
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 13.5, fontWeight: 700 }}>{brand.businessName}</span>
+            <span style={{ fontSize: 13.5, fontWeight: 700 }} className="md-nav">{account.name || brand.businessName}</span>
             <ThemeToggle />
+            <button onClick={logout} className="btn btn-ghost" style={{ padding: "8px 13px", fontSize: 13 }}>Log out</button>
             <span style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(145deg,var(--spruce),var(--spruce-2))", color: "#fff", display: "grid", placeItems: "center", fontWeight: 800, fontSize: 14 }}>
-              {(niche.sample.initials)}
+              {(account.name || brand.businessName || "A").slice(0, 1).toUpperCase()}
             </span>
           </div>
         </div>
       </header>
 
       <div className="wrap" style={{ maxWidth: 1180, width: "100%", flex: 1, padding: "26px 22px 60px" }}>
+        <GettingStarted onGoto={(t) => setTab(t as Tab)} name={account.name} />
         {/* tabs */}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 22 }}>
           {([

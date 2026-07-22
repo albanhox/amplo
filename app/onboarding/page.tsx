@@ -7,6 +7,7 @@ import { Wordmark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SETUP_ROLES, VOICES, FREQUENCIES, getSetupRole } from "@/lib/setupConfig";
 import { PlanBuilder } from "@/components/PlanBuilder";
+import { useAuth } from "@/components/useAuth";
 import { computeQuote, defaultSelection, type QuoteSelection, type Quote } from "@/lib/pricing";
 
 /**
@@ -15,6 +16,7 @@ import { computeQuote, defaultSelection, type QuoteSelection, type Quote } from 
  */
 export default function Onboarding() {
   const router = useRouter();
+  const { account, loading } = useAuth({ required: true, redirectTo: "/signup", next: "/onboarding" });
   const [step, setStep] = useState(0);
 
   const [roleId, setRoleId] = useState<string>("");
@@ -102,6 +104,10 @@ export default function Onboarding() {
     } catch {
       router.push("/dashboard?welcome=1");
     }
+  }
+
+  if (loading || !account) {
+    return <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--faint)", fontWeight: 600 }}>Loading…</div>;
   }
 
   return (

@@ -90,7 +90,7 @@ export function PricingCards() {
                 ))}
               </ul>
               <Link
-                href="/onboarding"
+                href="/signup"
                 className={plan.featured ? "btn btn-primary" : "btn btn-ghost"}
                 style={{ width: "100%", justifyContent: "center" }}
               >

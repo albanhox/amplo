@@ -6,11 +6,20 @@ export type SubStatus = "none" | "trialing" | "active" | "past_due" | "canceled"
 export interface Account {
   id: string;
   email: string;
+  name?: string;
+  /** scrypt hash as "salt:hash". Absent for demo/legacy accounts. */
+  passwordHash?: string;
   plan: PlanId;
   subscriptionStatus: SubStatus;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   trialEndsAt?: string;
+  createdAt: string;
+}
+
+export interface Session {
+  id: string; // the session token
+  accountId: string;
   createdAt: string;
 }
 

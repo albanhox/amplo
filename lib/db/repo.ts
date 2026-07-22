@@ -3,24 +3,43 @@
  * autopilot engine actually use.
  */
 import { Collection, newId } from "./store";
-import type { Account, Brand, ContentItem, ReviewRecord } from "./types";
+import type { Account, Brand, ContentItem, ReviewRecord, Session } from "./types";
 
 export const accounts = new Collection<Account>("accounts");
 export const brands = new Collection<Brand>("brands");
 export const content = new Collection<ContentItem>("content");
 export const reviews = new Collection<ReviewRecord>("reviews");
+export const sessions = new Collection<Session>("sessions");
 
 /* ---------- accounts ---------- */
 export function createAccount(email: string): Account {
-  const existing = accounts.find((a) => a.email === email)[0];
+  const existing = findAccountByEmail(email);
   if (existing) return existing;
   return accounts.upsert({
     id: newId("acct"),
-    email,
+    email: email.toLowerCase(),
     plan: "starter",
     subscriptionStatus: "none",
     createdAt: new Date().toISOString(),
   });
+}
+
+export function findAccountByEmail(email: string): Account | undefined {
+  const e = email.toLowerCase();
+  return accounts.find((a) => a.email.toLowerCase() === e)[0];
+}
+
+/* ---------- sessions ---------- */
+export function createSession(accountId: string, token: string): Session {
+  return sessions.upsert({ id: token, accountId, createdAt: new Date().toISOString() });
+}
+export function sessionAccount(token: string | undefined): Account | undefined {
+  if (!token) return undefined;
+  const s = sessions.get(token);
+  return s ? accounts.get(s.accountId) : undefined;
+}
+export function deleteSession(token: string | undefined): void {
+  if (token) sessions.remove(token);
 }
 
 /* ---------- brands ---------- */
