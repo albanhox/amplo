@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  let body: { plan?: PlanId; cadence?: "monthly" | "yearly"; email?: string };
+  let body: { plan?: PlanId; cadence?: "monthly" | "yearly"; email?: string; amountMonthly?: number; label?: string };
   try {
     body = await req.json();
   } catch {
@@ -25,6 +25,8 @@ export async function POST(req: NextRequest) {
       plan,
       cadence: body.cadence || "monthly",
       appUrl,
+      amountMonthly: body.amountMonthly,
+      label: body.label,
     });
     return NextResponse.json(result);
   } catch (e) {

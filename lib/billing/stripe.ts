@@ -38,11 +38,16 @@ export async function createCheckout(opts: {
   plan: PlanId;
   cadence: "monthly" | "yearly";
   appUrl: string;
+  /** Choice-based amount in whole dollars/month. When set, we charge this
+   *  exact amount via an inline recurring price instead of a fixed plan. */
+  amountMonthly?: number;
+  label?: string;
 }): Promise<CheckoutResult> {
   const price = priceId(opts.plan, opts.cadence);
+  const dynamic = typeof opts.amountMonthly === "number" && opts.amountMonthly > 0;
 
-  if (!isBillingConfigured() || !price || opts.plan === "starter") {
-    // Simulated checkout: activate the plan immediately and bounce to success.
+  // No Stripe key (or a $0 selection): simulate — activate and bounce to success.
+  if (!isBillingConfigured() || opts.plan === "starter" || (!dynamic && !price)) {
     accounts.update(opts.accountId, {
       plan: opts.plan,
       subscriptionStatus: opts.plan === "starter" ? "none" : "active",
@@ -50,14 +55,31 @@ export async function createCheckout(opts: {
     return { url: `${opts.appUrl}/dashboard?checkout=success&sim=1`, simulated: true };
   }
 
+  const line_items = dynamic
+    ? [
+        {
+          price_data: {
+            currency: "usd",
+            recurring: { interval: "month" as const },
+            unit_amount: Math.round(opts.amountMonthly! * 100),
+            product_data: { name: opts.label || "Amplo plan" },
+          },
+          quantity: 1,
+        },
+      ]
+    : [{ price: price as string, quantity: 1 }];
+
   const session = await stripe().checkout.sessions.create({
     mode: "subscription",
     customer_email: opts.email,
-    line_items: [{ price, quantity: 1 }],
+    line_items,
+    subscription_data: {
+      trial_period_days: 14,
+      metadata: { accountId: opts.accountId, plan: opts.plan, amountMonthly: String(opts.amountMonthly ?? "") },
+    },
     success_url: `${opts.appUrl}/dashboard?checkout=success`,
     cancel_url: `${opts.appUrl}/#pricing`,
     metadata: { accountId: opts.accountId, plan: opts.plan },
-    subscription_data: { metadata: { accountId: opts.accountId, plan: opts.plan } },
   });
   return { url: session.url as string, simulated: false };
 }

@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Wordmark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SETUP_ROLES, VOICES, FREQUENCIES, getSetupRole } from "@/lib/setupConfig";
+import { PlanBuilder } from "@/components/PlanBuilder";
+import { computeQuote, defaultSelection, type QuoteSelection, type Quote } from "@/lib/pricing";
 
 /**
  * Amplo setup — built for realtors & loan officers, and kept dead simple:
@@ -23,9 +25,11 @@ export default function Onboarding() {
   const [frequency, setFrequency] = useState("grow");
   const [connected, setConnected] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
+  const [planSel, setPlanSel] = useState<QuoteSelection>(defaultSelection(5, 3));
+  const [quote, setQuote] = useState<Quote>(() => computeQuote(defaultSelection(5, 3)));
 
   const role = getSetupRole(roleId);
-  const steps = ["You", "Business", "Content", "Style", "Connect"];
+  const steps = ["You", "Business", "Content", "Style", "Plan", "Connect"];
 
   // choosing a role seeds its default themes and auto-advances
   function chooseRole(id: string) {
@@ -40,10 +44,17 @@ export default function Onboarding() {
   }
 
   const canContinue =
-    (step === 1 && businessName.trim().length > 0) ||
-    (step === 2 && themes.length > 0) ||
-    step === 3 ||
-    step === 4;
+    (step === 1 && businessName.trim().length > 0) || (step === 2 && themes.length > 0);
+
+  // moving into the Plan step: seed the builder from earlier choices
+  function goToPlan() {
+    const perWeek = FREQUENCIES.find((f) => f.id === frequency)?.perWeek ?? 5;
+    const platforms = role?.defaultPlatforms.length ?? 3;
+    const seed = { ...defaultSelection(perWeek, platforms), postsPerWeek: perWeek, platforms };
+    setPlanSel(seed);
+    setQuote(computeQuote(seed));
+    setStep(4);
+  }
 
   async function finish() {
     if (!role) return;
@@ -61,6 +72,7 @@ export default function Onboarding() {
       about: `Focus topics: ${themeLabels.join(", ")}. Voice: ${voiceLabel}. Posting ${perWeek}x/week.`,
       themes: themeLabels,
       postsPerWeek: perWeek,
+      planMonthly: quote.monthly,
     };
     try {
       localStorage.setItem("amplo-brand", JSON.stringify(brand));
@@ -76,7 +88,18 @@ export default function Onboarding() {
       if (data.brandId) localStorage.setItem("amplo-brand-id", data.brandId);
     } catch {
       /* dashboard still works from localStorage */
-    } finally {
+    }
+    // Start the subscription for the chosen amount (14-day trial). Simulated
+    // without a Stripe key; opens real Stripe Checkout once keys are set.
+    try {
+      const co = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amountMonthly: quote.monthly, label: `Amplo — ${role.label} (${quote.baseLabel})` }),
+      });
+      const cod = await co.json();
+      router.push(cod.url || "/dashboard?welcome=1");
+    } catch {
       router.push("/dashboard?welcome=1");
     }
   }
@@ -193,12 +216,24 @@ export default function Onboarding() {
                 );
               })}
             </div>
-            <NavRow onBack={() => setStep(2)} onNext={() => setStep(4)} canNext />
+            <NavRow onBack={() => setStep(2)} onNext={goToPlan} canNext />
           </div>
         )}
 
-        {/* STEP 4 — connect + finish */}
+        {/* STEP 4 — choice-based plan */}
         {step === 4 && role && (
+          <div>
+            <H>Build your plan.</H>
+            <P>You only pay for what you pick. Adjust anything — the price updates live. Start with a 14-day free trial.</P>
+            <div style={{ marginTop: 24 }}>
+              <PlanBuilder initial={planSel} onChange={(s, q) => { setPlanSel(s); setQuote(q); }} />
+            </div>
+            <NavRow onBack={() => setStep(3)} onNext={() => setStep(5)} canNext />
+          </div>
+        )}
+
+        {/* STEP 5 — connect + finish */}
+        {step === 5 && role && (
           <div>
             <H>Last step — connect your accounts.</H>
             <P>This is what makes it automatic: Amplo pulls your Google reviews and posts to your pages. (Demo: connections are simulated.)</P>
@@ -216,9 +251,9 @@ export default function Onboarding() {
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 28, gap: 12 }}>
-              <button onClick={() => setStep(3)} className="btn btn-ghost">← Back</button>
-              <button onClick={finish} disabled={saving} className="btn btn-primary" style={{ minWidth: 190, justifyContent: "center" }}>
-                {saving ? "Building your posts…" : "Finish & see my posts →"}
+              <button onClick={() => setStep(4)} className="btn btn-ghost">← Back</button>
+              <button onClick={finish} disabled={saving} className="btn btn-primary" style={{ minWidth: 210, justifyContent: "center" }}>
+                {saving ? "Setting up…" : `Start free trial → $${quote.monthly}/mo`}
               </button>
             </div>
           </div>
