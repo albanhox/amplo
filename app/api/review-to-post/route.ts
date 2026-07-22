@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   // Reviews → posts is a paid feature.
-  const account = accountFromRequest(req);
+  const account = await accountFromRequest(req);
   if (account && !isPaidAccount(account)) {
     return NextResponse.json({ error: UPGRADE_MESSAGE, upgrade: true }, { status: 402 });
   }

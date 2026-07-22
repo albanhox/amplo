@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Prefer the logged-in account; fall back to demo for anonymous use.
-  const account = accountFromRequest(req) || createAccount(body.email || "demo@amplo.co");
+  const account = (await accountFromRequest(req)) || (await createAccount(body.email || "demo@amplo.co"));
   const brand: Brand = {
     id: newId("brand"),
     accountId: account.id,
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     connections: {},
     createdAt: new Date().toISOString(),
   };
-  brands.upsert(brand);
+  await brands.upsert(brand);
   return NextResponse.json({ brandId: brand.id, accountId: account.id });
 }
 
@@ -56,14 +56,14 @@ export async function PATCH(req: NextRequest) {
 
   // Autopilot is a paid feature.
   if (body.autopilot === true) {
-    const account = accountFromRequest(req);
+    const account = await accountFromRequest(req);
     if (account && !isPaidAccount(account)) {
       return NextResponse.json({ error: UPGRADE_MESSAGE, upgrade: true }, { status: 402 });
     }
   }
 
   const { id, ...patch } = body;
-  const updated = brands.update(id, patch);
+  const updated = await brands.update(id, patch);
   if (!updated) return NextResponse.json({ error: "Brand not found" }, { status: 404 });
   return NextResponse.json({ brand: updated });
 }
@@ -72,7 +72,7 @@ export async function PATCH(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
-  const brand = brands.get(id);
+  const brand = await brands.get(id);
   if (!brand) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ brand });
 }

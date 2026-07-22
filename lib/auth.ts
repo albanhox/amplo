@@ -29,20 +29,20 @@ export function newSessionToken(): string {
   return randomBytes(32).toString("hex");
 }
 
-export function startSession(accountId: string): string {
+export async function startSession(accountId: string): Promise<string> {
   const token = newSessionToken();
-  createSession(accountId, token);
+  await createSession(accountId, token);
   return token;
 }
 
-export function endSession(token: string | undefined): void {
-  deleteSession(token);
+export async function endSession(token: string | undefined): Promise<void> {
+  await deleteSession(token);
 }
 
 /** The logged-in account for a request, or null. */
-export function accountFromRequest(req: NextRequest): Account | null {
+export async function accountFromRequest(req: NextRequest): Promise<Account | null> {
   const token = req.cookies.get(SESSION_COOKIE)?.value;
-  return sessionAccount(token) ?? null;
+  return (await sessionAccount(token)) ?? null;
 }
 
 /** Safe public shape (never leak the password hash). */

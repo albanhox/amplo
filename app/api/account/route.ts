@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 /** Update the logged-in account: name, email, and/or password. */
 export async function PATCH(req: NextRequest) {
-  const account = accountFromRequest(req);
+  const account = await accountFromRequest(req);
   if (!account) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
 
   let body: { name?: string; email?: string; currentPassword?: string; newPassword?: string };
@@ -24,7 +24,7 @@ export async function PATCH(req: NextRequest) {
   if (body.email && body.email.trim().toLowerCase() !== account.email) {
     const email = body.email.trim().toLowerCase();
     if (!email.includes("@")) return NextResponse.json({ error: "Enter a valid email." }, { status: 400 });
-    if (findAccountByEmail(email)) return NextResponse.json({ error: "That email is already in use." }, { status: 409 });
+    if (await findAccountByEmail(email)) return NextResponse.json({ error: "That email is already in use." }, { status: 409 });
     patch.email = email;
   }
 
@@ -36,6 +36,6 @@ export async function PATCH(req: NextRequest) {
     patch.passwordHash = hashPassword(body.newPassword);
   }
 
-  const updated = accounts.update(account.id, patch);
+  const updated = await accounts.update(account.id, patch);
   return NextResponse.json({ account: publicAccount(updated || account) });
 }

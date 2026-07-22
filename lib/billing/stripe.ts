@@ -48,7 +48,7 @@ export async function createCheckout(opts: {
 
   // No Stripe key (or a $0 selection): simulate — activate and bounce to success.
   if (!isBillingConfigured() || opts.plan === "starter" || (!dynamic && !price)) {
-    accounts.update(opts.accountId, {
+    await accounts.update(opts.accountId, {
       plan: opts.plan,
       subscriptionStatus: opts.plan === "starter" ? "none" : "active",
     });
@@ -99,7 +99,7 @@ export async function handleWebhook(rawBody: string, signature: string | null): 
       const obj = event.data.object as any;
       const accountId = obj.metadata?.accountId;
       if (accountId) {
-        accounts.update(accountId, {
+        await accounts.update(accountId, {
           subscriptionStatus: mapStatus(obj.status),
           plan: (obj.metadata?.plan as PlanId) || undefined,
           stripeCustomerId: obj.customer,
@@ -111,7 +111,7 @@ export async function handleWebhook(rawBody: string, signature: string | null): 
     case "customer.subscription.deleted": {
       const obj = event.data.object as any;
       if (obj.metadata?.accountId) {
-        accounts.update(obj.metadata.accountId, { subscriptionStatus: "canceled" });
+        await accounts.update(obj.metadata.accountId, { subscriptionStatus: "canceled" });
       }
       break;
     }

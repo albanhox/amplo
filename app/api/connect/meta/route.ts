@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 /** Start the Meta (Facebook + Instagram) OAuth flow. /api/connect/meta?brandId=... */
 export async function GET(req: NextRequest) {
-  const account = accountFromRequest(req);
+  const account = await accountFromRequest(req);
   if (account && !isPaidAccount(account)) {
     return NextResponse.redirect(new URL("/dashboard?upgrade=connect", req.url));
   }
@@ -18,8 +18,8 @@ export async function GET(req: NextRequest) {
   // Demo mode (no credentials): simulate the connection and return.
   if (!isMetaConfigured()) {
     const conn = await exchangeMetaCode("");
-    const brand = brandId ? brands.get(brandId) : undefined;
-    if (brand) brands.update(brand.id, { connections: { ...brand.connections, meta: conn } });
+    const brand = brandId ? await brands.get(brandId) : undefined;
+    if (brand) await brands.update(brand.id, { connections: { ...brand.connections, meta: conn } });
     return NextResponse.redirect(new URL("/dashboard?connect=meta_ok&sim=1", req.url));
   }
 

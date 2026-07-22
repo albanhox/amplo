@@ -5,7 +5,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  endSession(req.cookies.get(SESSION_COOKIE)?.value);
+  await endSession(req.cookies.get(SESSION_COOKIE)?.value);
   const res = NextResponse.json({ ok: true });
   res.cookies.set(SESSION_COOKIE, "", { path: "/", maxAge: 0 });
   return res;

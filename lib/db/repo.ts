@@ -1,6 +1,6 @@
 /**
- * Repositories — typed access to each collection plus the queries the app and
- * autopilot engine actually use.
+ * Repositories — typed access to each collection plus the async queries the app
+ * and autopilot engine use.
  */
 import { Collection, newId } from "./store";
 import type { Account, Brand, ContentItem, ReviewRecord, Session } from "./types";
@@ -12,8 +12,8 @@ export const reviews = new Collection<ReviewRecord>("reviews");
 export const sessions = new Collection<Session>("sessions");
 
 /* ---------- accounts ---------- */
-export function createAccount(email: string): Account {
-  const existing = findAccountByEmail(email);
+export async function createAccount(email: string): Promise<Account> {
+  const existing = await findAccountByEmail(email);
   if (existing) return existing;
   return accounts.upsert({
     id: newId("acct"),
@@ -24,52 +24,45 @@ export function createAccount(email: string): Account {
   });
 }
 
-export function findAccountByEmail(email: string): Account | undefined {
+export async function findAccountByEmail(email: string): Promise<Account | undefined> {
   const e = email.toLowerCase();
-  return accounts.find((a) => a.email.toLowerCase() === e)[0];
+  return (await accounts.find((a) => a.email.toLowerCase() === e))[0];
 }
 
 /* ---------- sessions ---------- */
-export function createSession(accountId: string, token: string): Session {
+export async function createSession(accountId: string, token: string): Promise<Session> {
   return sessions.upsert({ id: token, accountId, createdAt: new Date().toISOString() });
 }
-export function sessionAccount(token: string | undefined): Account | undefined {
+export async function sessionAccount(token: string | undefined): Promise<Account | undefined> {
   if (!token) return undefined;
-  const s = sessions.get(token);
+  const s = await sessions.get(token);
   return s ? accounts.get(s.accountId) : undefined;
 }
-export function deleteSession(token: string | undefined): void {
-  if (token) sessions.remove(token);
+export async function deleteSession(token: string | undefined): Promise<void> {
+  if (token) await sessions.remove(token);
 }
 
 /* ---------- brands ---------- */
-export function brandsByAccount(accountId: string): Brand[] {
+export function brandsByAccount(accountId: string): Promise<Brand[]> {
   return brands.find((b) => b.accountId === accountId);
 }
-
-export function autopilotBrands(): Brand[] {
+export function autopilotBrands(): Promise<Brand[]> {
   return brands.find((b) => b.autopilot);
 }
 
 /* ---------- content ---------- */
-export function queueForBrand(brandId: string): ContentItem[] {
-  return content
-    .find((c) => c.brandId === brandId)
-    .sort((a, b) => (a.scheduledAt || a.createdAt).localeCompare(b.scheduledAt || b.createdAt));
+export async function queueForBrand(brandId: string): Promise<ContentItem[]> {
+  const items = await content.find((c) => c.brandId === brandId);
+  return items.sort((a, b) => (a.scheduledAt || a.createdAt).localeCompare(b.scheduledAt || b.createdAt));
 }
-
-export function scheduledCount(brandId: string): number {
-  return content.find((c) => c.brandId === brandId && c.status === "scheduled").length;
+export async function scheduledCount(brandId: string): Promise<number> {
+  return (await content.find((c) => c.brandId === brandId && c.status === "scheduled")).length;
 }
-
-/** Posts that are scheduled and due to publish now. */
-export function duePosts(nowIso: string): ContentItem[] {
-  return content.find(
-    (c) => c.status === "scheduled" && !!c.scheduledAt && c.scheduledAt <= nowIso
-  );
+export function duePosts(nowIso: string): Promise<ContentItem[]> {
+  return content.find((c) => c.status === "scheduled" && !!c.scheduledAt && c.scheduledAt <= nowIso);
 }
 
 /* ---------- reviews ---------- */
-export function unprocessedReviews(brandId: string): ReviewRecord[] {
+export function unprocessedReviews(brandId: string): Promise<ReviewRecord[]> {
   return reviews.find((r) => r.brandId === brandId && !r.processed);
 }

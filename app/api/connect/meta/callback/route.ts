@@ -16,8 +16,8 @@ export async function GET(req: NextRequest) {
   try {
     const connection = await exchangeMetaCode(code);
     if (brandId) {
-      const brand = brands.get(brandId);
-      if (brand) brands.update(brandId, { connections: { ...brand.connections, meta: connection } });
+      const brand = await brands.get(brandId);
+      if (brand) await brands.update(brandId, { connections: { ...brand.connections, meta: connection } });
     }
   } catch {
     return NextResponse.redirect(new URL("/dashboard?connect=meta_error", req.url));

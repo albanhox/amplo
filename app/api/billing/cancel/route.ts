@@ -7,8 +7,8 @@ export const dynamic = "force-dynamic";
 
 /** Cancel the subscription. (Simulated; wire real Stripe cancellation in prod.) */
 export async function POST(req: NextRequest) {
-  const account = accountFromRequest(req);
+  const account = await accountFromRequest(req);
   if (!account) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
-  const updated = accounts.update(account.id, { subscriptionStatus: "canceled", plan: "starter" });
+  const updated = await accounts.update(account.id, { subscriptionStatus: "canceled", plan: "starter" });
   return NextResponse.json({ account: publicAccount(updated || account) });
 }

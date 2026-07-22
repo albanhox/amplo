@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 /** Start the Google Business OAuth flow. /api/connect/google?brandId=... */
 export async function GET(req: NextRequest) {
-  const account = accountFromRequest(req);
+  const account = await accountFromRequest(req);
   if (account && !isPaidAccount(account)) {
     return NextResponse.redirect(new URL("/dashboard?upgrade=connect", req.url));
   }
@@ -18,8 +18,8 @@ export async function GET(req: NextRequest) {
   // Demo mode (no credentials): simulate the connection and return.
   if (!isGoogleConfigured()) {
     const conn = await exchangeGoogleCode("");
-    const brand = brandId ? brands.get(brandId) : undefined;
-    if (brand) brands.update(brand.id, { connections: { ...brand.connections, google: conn } });
+    const brand = brandId ? await brands.get(brandId) : undefined;
+    if (brand) await brands.update(brand.id, { connections: { ...brand.connections, google: conn } });
     return NextResponse.redirect(new URL("/dashboard?connect=google_ok&sim=1", req.url));
   }
 

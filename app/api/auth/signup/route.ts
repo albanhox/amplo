@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
   const password = body.password || "";
   if (!email || !email.includes("@")) return NextResponse.json({ error: "Enter a valid email." }, { status: 400 });
   if (password.length < 8) return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
-  if (findAccountByEmail(email)) return NextResponse.json({ error: "An account with this email already exists. Try logging in." }, { status: 409 });
+  if (await findAccountByEmail(email)) return NextResponse.json({ error: "An account with this email already exists. Try logging in." }, { status: 409 });
 
-  const account = accounts.upsert({
+  const account = await accounts.upsert({
     id: newId("acct"),
     email,
     name: body.name?.trim() || undefined,
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     createdAt: new Date().toISOString(),
   });
 
-  const token = startSession(account.id);
+  const token = await startSession(account.id);
   const res = NextResponse.json({ account: publicAccount(account) });
   res.cookies.set(SESSION_COOKIE, token, cookieOptions());
   return res;

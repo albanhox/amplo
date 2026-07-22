@@ -16,8 +16,8 @@ export async function GET(req: NextRequest) {
   try {
     const connection = await exchangeGoogleCode(code);
     if (brandId) {
-      const brand = brands.get(brandId);
-      if (brand) brands.update(brandId, { connections: { ...brand.connections, google: connection } });
+      const brand = await brands.get(brandId);
+      if (brand) await brands.update(brandId, { connections: { ...brand.connections, google: connection } });
     }
   } catch {
     return NextResponse.redirect(new URL("/dashboard?connect=google_error", req.url));

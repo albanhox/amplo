@@ -59,7 +59,7 @@ export async function planContent(
         scheduledAt: scheduleAt(start, idx),
         createdAt: new Date().toISOString(),
       };
-      content.upsert(item);
+      await content.upsert(item);
       created.push(item);
       idx++;
     }

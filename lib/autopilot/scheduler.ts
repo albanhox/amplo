@@ -40,16 +40,16 @@ export async function tick(now: Date = new Date()): Promise<TickSummary> {
     actions: [],
   };
 
-  const active = autopilotBrands();
+  const active = await autopilotBrands();
   summary.brands = active.length;
 
   for (const brand of active) {
     // 1) Reviews → posts
     const fetched = await listGoogleReviews(brand.connections.google, brand.nicheId);
     for (const r of fetched) {
-      const known = reviews.find((x) => x.brandId === brand.id && x.id === `rev_${r.externalId}`)[0];
+      const known = (await reviews.find((x) => x.brandId === brand.id && x.id === `rev_${r.externalId}`))[0];
       if (known) continue;
-      const rec = reviews.upsert({
+      const rec = await reviews.upsert({
         id: `rev_${r.externalId}`,
         brandId: brand.id,
         author: r.author,
@@ -79,20 +79,20 @@ export async function tick(now: Date = new Date()): Promise<TickSummary> {
             scheduledAt: new Date(now.getTime() + 60 * 60 * 1000).toISOString(), // ~1h out
             createdAt: nowIso,
           };
-          content.upsert(item);
-          reviews.update(rec.id, { processed: true, contentItemId: item.id });
+          await content.upsert(item);
+          await reviews.update(rec.id, { processed: true, contentItemId: item.id });
           summary.reviewPosts++;
           summary.actions.push(`${brand.businessName}: turned ${rec.author}'s ${rec.stars}★ review into a post`);
         } catch {
-          reviews.update(rec.id, { processed: true }); // low-star or error → don't publish
+          await reviews.update(rec.id, { processed: true }); // low-star or error → don't publish
         }
       } else {
-        reviews.update(rec.id, { processed: true }); // negative review → private handling only
+        await reviews.update(rec.id, { processed: true }); // negative review → private handling only
       }
     }
 
     // 2) Top up the queue
-    if (scheduledCount(brand.id) < QUEUE_FLOOR) {
+    if ((await scheduledCount(brand.id)) < QUEUE_FLOOR) {
       const { created } = await planContent(brand);
       summary.planned += created.length;
       if (created.length) summary.actions.push(`${brand.businessName}: planned ${created.length} new posts`);
@@ -100,18 +100,18 @@ export async function tick(now: Date = new Date()): Promise<TickSummary> {
   }
 
   // 3) Publish due posts (across all brands)
-  for (const item of duePosts(nowIso)) {
-    const brand = brands.get(item.brandId);
+  for (const item of await duePosts(nowIso)) {
+    const brand = await brands.get(item.brandId);
     if (!brand) continue;
     const res = await publish(brand, item);
     if (res.ok) {
-      content.update(item.id, { status: "posted", postedAt: nowIso, externalId: res.externalId });
+      await content.update(item.id, { status: "posted", postedAt: nowIso, externalId: res.externalId });
       summary.published++;
       summary.actions.push(
         `${brand.businessName}: published ${item.type} to ${item.platform}${res.simulated ? " (simulated)" : ""}`
       );
     } else {
-      content.update(item.id, { status: "failed", error: res.error });
+      await content.update(item.id, { status: "failed", error: res.error });
       summary.failed++;
     }
   }
@@ -120,6 +120,6 @@ export async function tick(now: Date = new Date()): Promise<TickSummary> {
 }
 
 /** Seed helper used by the demo/smoke test: flip a brand to autopilot. */
-export function enableAutopilot(brand: Brand) {
-  brands.update(brand.id, { autopilot: true });
+export async function enableAutopilot(brand: Brand) {
+  await brands.update(brand.id, { autopilot: true });
 }
