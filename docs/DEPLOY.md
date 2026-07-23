@@ -15,7 +15,7 @@ Vercel hosts the app for free to start and connects straight to your GitHub.
 
 1. Go to **https://vercel.com** → **Sign Up** → **Continue with GitHub**.
 2. Click **Add New… → Project**.
-3. Find **`albanhox/social-media-and-SEO-builder`** in the list → **Import**.
+3. Find **`albanhox/amplo`** in the list → **Import**.
 4. Vercel auto-detects Next.js. Leave everything default.
 5. Click **Deploy**. Wait ~2 minutes.
 6. You'll get a live URL like `https://amplo-xxxx.vercel.app`. **That's your app, live.** 🎉
@@ -25,8 +25,8 @@ plan builder all work. AI + payments are simulated until you add keys (next stag
 
 > **Important — data persistence.** On Vercel the app runs "serverless," which
 > does not keep the local file-based storage between visits. For a real product
-> where signups and settings **stick**, you need a database. It's a clean swap
-> (the code is built for it) — see Stage 4. Fine to skip while testing.
+> where signups and settings **stick**, you need a database. The Postgres backend is
+> already built — set `DATABASE_URL` (see Stage 4). Fine to skip while testing.
 
 ---
 
@@ -79,9 +79,10 @@ with the `sk_live_…` key and a new live webhook, redeploy. Done — you're cha
 
 These make it a real business, not a demo. Tackle in any order.
 
-- **Database (so data persists).** Add **Vercel Postgres** or **Supabase** (both have
-  free tiers) and point `lib/db` at it. The repositories are already abstracted, so
-  it's a contained change — ask me and I'll wire it.
+- **Database (so data persists).** ✅ **Done.** `lib/db/store.ts` runs on Postgres
+  whenever `DATABASE_URL` is set (Supabase pooler works as-is), and falls back to a
+  local JSON file for dev. Nothing to wire — just set `DATABASE_URL` in Vercel →
+  Environment Variables and redeploy.
 - **Autopilot schedule.** Already configured in `vercel.json` to run daily. To turn it
   on, add an env var `CRON_SECRET` (any long random string) — Vercel Cron uses it
   automatically. (More-frequent runs need Vercel's Pro plan.)
