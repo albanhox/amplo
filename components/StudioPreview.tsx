@@ -50,7 +50,7 @@ export function StudioPreview() {
           <span key={i} style={{ width: 11, height: 11, borderRadius: "50%", background: "var(--line)" }} />
         ))}
         <span style={{ marginLeft: 8, fontSize: 12, color: "var(--faint)", fontWeight: 600, background: "var(--surface-3)", padding: "4px 12px", borderRadius: 20 }}>
-          app.popd.co/studio
+          app.pop-d.com/studio
         </span>
       </div>
       <div style={{ padding: 18 }}>

@@ -91,7 +91,7 @@ These make it a real business, not a demo. Tackle in any order.
 - **Meta (Instagram/Facebook) posting.** Create an app at **developers.facebook.com**,
   request the posting permissions, and go through **App Review**. Also slow — budget
   a week or two. Until then, posts are drafted for you to publish.
-- **Custom domain.** In Vercel → **Settings → Domains**, add `popd.co` (or whatever
+- **Custom domain.** In Vercel → **Settings → Domains**, add `pop-d.com` (or whatever
   you buy). Vercel walks you through the DNS.
 
 ---

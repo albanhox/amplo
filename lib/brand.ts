@@ -5,9 +5,9 @@
 export const BRAND = {
   name: "Popd",
   tagline: "Local marketing on autopilot",
-  domain: "popd.co",
-  appDomain: "app.popd.co",
-  supportEmail: "hello@popd.co",
+  domain: "pop-d.com",
+  appDomain: "app.pop-d.com",
+  supportEmail: "hello@pop-d.com",
   // Persimmon + spruce identity.
   colors: {
     brand: "#EE5A36",

@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Prefer the logged-in account; fall back to demo for anonymous use.
-  const account = (await accountFromRequest(req)) || (await createAccount(body.email || "demo@popd.co"));
+  const account = (await accountFromRequest(req)) || (await createAccount(body.email || "demo@pop-d.com"));
   const brand: Brand = {
     id: newId("brand"),
     accountId: account.id,

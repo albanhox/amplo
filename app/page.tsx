@@ -214,7 +214,7 @@ export default function Home() {
             <a href="#reviews">Reviews → Posts</a>
             <a href="#pricing">Pricing</a>
             <a href="#">FAQ</a>
-            <a href="mailto:hello@popd.co">Contact</a>
+            <a href="mailto:hello@pop-d.com">Contact</a>
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
           </div>
