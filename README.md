@@ -53,7 +53,7 @@ in one place — [`components/Logo.tsx`](components/Logo.tsx) and copy strings �
 | `app/api/connect/*` | Google & Meta OAuth connect + callback routes |
 | `app/api/billing/*` | Stripe checkout + webhook |
 | `app/api/cron/tick` | Autopilot heartbeat (point a cron here) |
-| `lib/agents/` | The AI IP — Claude-powered agents with a built-in demo fallback |
+| `lib/agents/` | The AI IP — Gemini-powered agents (text + nano-banana images) with a demo fallback |
 | `lib/autopilot/` | The engine — planner + scheduler that plan, convert reviews, and publish |
 | `lib/integrations/` | Google Business + Meta publishing (real calls, simulated fallback) |
 | `lib/billing/` | Stripe subscriptions + usage hooks (simulated without a key) |
@@ -73,15 +73,15 @@ npm run dev          # http://localhost:3000
 
 **It works with zero configuration.** With no API key, the agents use a built-in demo
 generator so you can click through the entire product. To switch on real AI, copy
-`.env.example` → `.env.local` and add your Anthropic key:
+`.env.example` → `.env.local` and add your Gemini key:
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-...
-POPD_MODEL=claude-sonnet-5
+GEMINI_API_KEY=...
+POPD_TEXT_MODEL=gemini-2.5-flash
 ```
 
 The moment a key is present, `/api/generate` and `/api/review-to-post` return `"live": true`
-and use Claude for every post.
+and use Gemini for every post + image.
 
 Just want to *see* it? Open `marketing/index.html` directly — no install, fully interactive
 (pick a niche, regenerate posts, browse the dashboard, toggle pricing and dark mode).
@@ -90,7 +90,7 @@ Just want to *see* it? Open `marketing/index.html` directly — no install, full
 
 ## The AI agents (the IP)
 
-Each agent is a small, prompt-engineered module in `lib/agents/`. They share one Claude
+Each agent is a small, prompt-engineered module in `lib/agents/`. They share one Gemini
 wrapper (`anthropic.ts`) and every one degrades gracefully to a demo generator so the app
 never hard-fails.
 
@@ -156,7 +156,7 @@ Every pillar is coded and runs today in simulation. Going live = pasting credent
 
 | Pillar | Status | To activate |
 | --- | --- | --- |
-| AI agents | ✅ built | `ANTHROPIC_API_KEY` |
+| AI agents (text + images) | ✅ built | `GEMINI_API_KEY` |
 | Google Business (reviews + local posts) | ✅ OAuth + API wired | `GOOGLE_CLIENT_ID` / `SECRET` |
 | Meta (Instagram + Facebook) | ✅ OAuth + Graph wired | `META_APP_ID` / `SECRET` |
 | Stripe billing | ✅ checkout + webhook wired | `STRIPE_SECRET_KEY` + price ids |
@@ -170,7 +170,7 @@ simulated to live automatically.
 
 ## Tech
 
-Next.js 14 (App Router) · React 18 · TypeScript · Tailwind · Anthropic SDK. Light/dark theme,
+Next.js 14 (App Router) · React 18 · TypeScript · Tailwind · Google Gemini SDK. Light/dark theme,
 responsive, and no external runtime dependencies beyond the AI calls.
 
 <div align="center"><sub>Popd — stop posting, start growing.</sub></div>
