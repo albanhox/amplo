@@ -23,7 +23,7 @@ export const PLANS: Plan[] = [
   {
     id: "starter",
     name: "Free",
-    tagline: "A taste of Amplo — see it write for your business.",
+    tagline: "A taste of Popd — see it write for your business.",
     monthly: 0,
     yearlyMonthly: 0,
     cta: "Try it free",

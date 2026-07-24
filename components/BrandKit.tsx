@@ -149,7 +149,7 @@ export function BrandKit({ brand }: { brand: BrandProfile }) {
           <div>
             <div style={{ fontWeight: 850, fontSize: 16 }}>Post templates</div>
             <div style={{ fontSize: 13.5, color: "var(--muted)", fontWeight: 500, marginTop: 3 }}>
-              Pick the looks you like — Amplo rotates through your selected templates.
+              Pick the looks you like — Popd rotates through your selected templates.
             </div>
           </div>
           <span style={{ fontSize: 12.5, fontWeight: 800, color: accent, background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 999, padding: "5px 12px" }}>{selected.length} selected</span>
@@ -167,7 +167,7 @@ export function BrandKit({ brand }: { brand: BrandProfile }) {
           <div>
             <div style={{ fontWeight: 850, fontSize: 16 }}>Your photos & inspiration</div>
             <div style={{ fontSize: 13.5, color: "var(--muted)", fontWeight: 500, marginTop: 3 }}>
-              Add listing photos, your headshot, or posts you liked. Amplo uses these in your designs.
+              Add listing photos, your headshot, or posts you liked. Popd uses these in your designs.
             </div>
           </div>
           <button onClick={() => mediaInput.current?.click()} className="btn btn-primary" style={{ padding: "9px 16px", fontSize: 13.5 }}>+ Upload images</button>

@@ -4,7 +4,7 @@
  * Each template is a visual "look" for a post — a layout + color treatment the
  * design engine fills with the AI-written copy (and the user's logo/photos).
  * Tailored to real estate + mortgage. Users browse these and pick favorites;
- * Amplo rotates through the chosen ones.
+ * Popd rotates through the chosen ones.
  */
 
 export type TemplateCategory =

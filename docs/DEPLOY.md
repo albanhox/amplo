@@ -1,4 +1,4 @@
-# Getting Amplo live (and taking real payments)
+# Getting Popd live (and taking real payments)
 
 Plain-English, click-by-click. No prior deployment experience needed. Rough time:
 **~30–45 min** for a live app taking test payments; a bit more for real cards and
@@ -18,7 +18,7 @@ Vercel hosts the app for free to start and connects straight to your GitHub.
 3. Find **`albanhox/social-media-and-SEO-builder`** in the list → **Import**.
 4. Vercel auto-detects Next.js. Leave everything default.
 5. Click **Deploy**. Wait ~2 minutes.
-6. You'll get a live URL like `https://amplo-xxxx.vercel.app`. **That's your app, live.** 🎉
+6. You'll get a live URL like `https://popd-xxxx.vercel.app`. **That's your app, live.** 🎉
 
 At this point the marketing site, the setup flow, brand kit, templates, and the
 plan builder all work. AI + payments are simulated until you add keys (next stages).
@@ -37,7 +37,7 @@ plan builder all work. AI + payments are simulated until you add keys (next stag
 2. In Vercel: your project → **Settings → Environment Variables**.
 3. Add:
    - `ANTHROPIC_API_KEY` = your key
-   - `AMPLO_MODEL` = `claude-sonnet-5`
+   - `POPD_MODEL` = `claude-sonnet-5`
 4. Click **Save**, then **Deployments → ⋯ → Redeploy** (env vars apply on next deploy).
 
 Now every post is written by real AI. The Content Studio will show **“✓ Live AI.”**
@@ -71,7 +71,7 @@ any future date, any CVC.
 with the `sk_live_…` key and a new live webhook, redeploy. Done — you're charging.
 
 > The plan prices live in `lib/pricing.ts`. Change them there anytime; no Stripe
-> products to set up — Amplo creates the priced subscription on the fly.
+> products to set up — Popd creates the priced subscription on the fly.
 
 ---
 
@@ -91,7 +91,7 @@ These make it a real business, not a demo. Tackle in any order.
 - **Meta (Instagram/Facebook) posting.** Create an app at **developers.facebook.com**,
   request the posting permissions, and go through **App Review**. Also slow — budget
   a week or two. Until then, posts are drafted for you to publish.
-- **Custom domain.** In Vercel → **Settings → Domains**, add `amplo.co` (or whatever
+- **Custom domain.** In Vercel → **Settings → Domains**, add `popd.co` (or whatever
   you buy). Vercel walks you through the DNS.
 
 ---

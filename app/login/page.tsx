@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { AuthForm } from "@/components/AuthForm";
 
-export const metadata = { title: "Log in — Amplo" };
+export const metadata = { title: "Log in — Popd" };
 
 export default function LoginPage() {
   return (

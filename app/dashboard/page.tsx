@@ -303,7 +303,7 @@ function Reviews({ brand, isPaid, onUpgrade }: { brand: BrandProfile; isPaid: bo
         {generated ? (
           <div style={{ fontSize: 14, lineHeight: 1.55, fontWeight: 500 }}>{generated}</div>
         ) : (
-          <div style={{ color: "var(--faint)", fontSize: 14 }}>Click “Turn into a post” to watch Amplo convert a 5★ review into a branded post.</div>
+          <div style={{ color: "var(--faint)", fontSize: 14 }}>Click “Turn into a post” to watch Popd convert a 5★ review into a branded post.</div>
         )}
       </div>
     </div>
@@ -440,7 +440,7 @@ function Settings({ brand, isPaid, note }: { brand: BrandProfile; isPaid: boolea
         <div style={{ flex: 1, minWidth: 220 }}>
           <div style={{ fontWeight: 850, fontSize: 16 }}>Autopilot</div>
           <div style={{ fontSize: 13.5, color: "var(--muted)", fontWeight: 500, marginTop: 3 }}>
-            When on, Amplo plans your calendar, turns new 5★ reviews into posts, and publishes on schedule — hands-free.
+            When on, Popd plans your calendar, turns new 5★ reviews into posts, and publishes on schedule — hands-free.
           </div>
         </div>
         <button onClick={toggleAutopilot} disabled={busy || !brandId} className={record?.autopilot && isPaid ? "btn btn-primary" : "btn btn-ghost"} style={{ opacity: brandId ? 1 : 0.5 }}>

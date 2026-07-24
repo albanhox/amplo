@@ -12,8 +12,8 @@ export interface TourStep {
 const STEPS: TourStep[] = [
   { id: "business", label: "Set up your business", hint: "Done during signup ✓" },
   { id: "brand", label: "Add your logo & pick templates", hint: "Make posts look like your brand", tab: "brand" },
-  { id: "connect", label: "Connect Google, Instagram & Facebook", hint: "So Amplo can post & pull reviews", tab: "settings" },
-  { id: "approve", label: "Review & approve your first post", hint: "See what Amplo wrote for you", tab: "studio" },
+  { id: "connect", label: "Connect Google, Instagram & Facebook", hint: "So Popd can post & pull reviews", tab: "settings" },
+  { id: "approve", label: "Review & approve your first post", hint: "See what Popd wrote for you", tab: "studio" },
   { id: "autopilot", label: "Turn on autopilot", hint: "Set it and forget it", tab: "settings" },
 ];
 

@@ -26,7 +26,7 @@ export function Wordmark({ size = 30 }: { size?: number }) {
   return (
     <span style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 850, fontSize: 19, letterSpacing: "-.03em" }}>
       <Logo size={size} />
-      Amplo
+      Popd
     </span>
   );
 }

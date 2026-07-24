@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   }
   const plan = body.plan || "growth";
   // Charge the logged-in account; fall back to demo only when anonymous.
-  const account = (await accountFromRequest(req)) || (await createAccount(body.email || "demo@amplo.co"));
+  const account = (await accountFromRequest(req)) || (await createAccount(body.email || "demo@popd.co"));
   const email = account.email;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;
 

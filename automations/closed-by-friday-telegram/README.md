@@ -37,7 +37,7 @@ API key — it falls back to a built-in sample so you can see the exact format. 
 | Var | Purpose | Default |
 | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | Live AI generation | *(sample if unset)* |
-| `AMPLO_MODEL` | Model id | `claude-sonnet-5` |
+| `POPD_MODEL` | Model id | `claude-sonnet-5` |
 | `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` | **Preferred** delivery — direct via `api.telegram.org` | — |
 | `CBF_RELAY_URL` | Alternative delivery via a VPS relay | — |
 | `POSTS` / `SEO` | How many of each to generate | `5` / `3` |
@@ -62,4 +62,4 @@ generates the content and curls your relay. (Ask and I'll create the Routine for
 ## The review loop
 
 You get the digest in Telegram → reply 👍 to approve or say what to change → post the
-approved ones (or, once you connect Google/Meta in Amplo, let it publish for you).
+approved ones (or, once you connect Google/Meta in Popd, let it publish for you).

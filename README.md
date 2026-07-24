@@ -1,10 +1,10 @@
 <div align="center">
 
-# 🟠 Amplo
+# 🟠 Popd
 
 ### Local marketing on autopilot.
 
-**Amplo is a self-serve AI service that runs social media and local SEO for local businesses.**
+**Popd is a self-serve AI service that runs social media and local SEO for local businesses.**
 Pick your niche, tell it what you want, connect Google — and it writes posts, turns your
 Google reviews into content, and keeps you visible. Set it once. It runs itself.
 
@@ -18,15 +18,15 @@ Every local service business — realtors, dentists, lawyers, med spas, contract
 knows they *should* be posting on social and showing up on Google. Almost none of them have
 the time. Agencies charge $400–1,500/mo to do it by hand.
 
-Amplo productizes that whole job into software an owner can turn on in 10 minutes:
+Popd productizes that whole job into software an owner can turn on in 10 minutes:
 
-1. **Pick your niche** → Amplo already knows your language, best content angles, and platforms.
+1. **Pick your niche** → Popd already knows your language, best content angles, and platforms.
 2. **Describe your business & voice** → it writes in *your* tone, not a robot's.
 3. **Connect Google + your socials** → it pulls your real reviews and posts to your pages.
 4. **Approve or automate** → a full month of content, ready. Flip on autopilot and forget it.
 
 The headline feature: **your Google reviews become content automatically.** A new 5★ review
-comes in → Amplo turns it into a branded, ready-to-publish social post that thanks the
+comes in → Popd turns it into a branded, ready-to-publish social post that thanks the
 customer and invites new ones. Word-of-mouth, on repeat.
 
 > This is a standalone product — its own brand, sold to any local business. It was inspired by
@@ -35,7 +35,7 @@ customer and invites new ones. Word-of-mouth, on repeat.
 
 ### Name
 
-**Amplo** — coined from *amplify* + *local*. Short, ownable, niche-agnostic (works for a law
+**Popd** — coined from *amplify* + *local*. Short, ownable, niche-agnostic (works for a law
 firm or a nail salon), and easy to say. Two alternates if you want to compare: **Mainstreet**
 (warm, "marketing for Main Street") and **Everpost** (descriptive, always-on). The name lives
 in one place — [`components/Logo.tsx`](components/Logo.tsx) and copy strings — so renaming is trivial.
@@ -77,7 +77,7 @@ generator so you can click through the entire product. To switch on real AI, cop
 
 ```bash
 ANTHROPIC_API_KEY=sk-ant-...
-AMPLO_MODEL=claude-sonnet-5
+POPD_MODEL=claude-sonnet-5
 ```
 
 The moment a key is present, `/api/generate` and `/api/review-to-post` return `"live": true`
@@ -173,4 +173,4 @@ simulated to live automatically.
 Next.js 14 (App Router) · React 18 · TypeScript · Tailwind · Anthropic SDK. Light/dark theme,
 responsive, and no external runtime dependencies beyond the AI calls.
 
-<div align="center"><sub>Amplo — stop posting, start growing.</sub></div>
+<div align="center"><sub>Popd — stop posting, start growing.</sub></div>

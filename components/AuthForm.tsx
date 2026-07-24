@@ -57,7 +57,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             {isSignup ? "Create your account" : "Welcome back"}
           </h1>
           <p style={{ color: "var(--muted)", fontSize: 15, textAlign: "center", marginTop: 8, fontWeight: 500 }}>
-            {isSignup ? "Start your free trial — no card required." : "Log in to your Amplo dashboard."}
+            {isSignup ? "Start your free trial — no card required." : "Log in to your Popd dashboard."}
           </p>
 
           <form onSubmit={submit} className="card" style={{ padding: 24, marginTop: 24, display: "flex", flexDirection: "column", gap: 14 }}>
@@ -86,7 +86,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             {isSignup ? (
               <>Already have an account? <Link href="/login" style={{ color: "var(--brand)", fontWeight: 700 }}>Log in</Link></>
             ) : (
-              <>New to Amplo? <Link href="/signup" style={{ color: "var(--brand)", fontWeight: 700 }}>Create an account</Link></>
+              <>New to Popd? <Link href="/signup" style={{ color: "var(--brand)", fontWeight: 700 }}>Create an account</Link></>
             )}
           </p>
         </div>

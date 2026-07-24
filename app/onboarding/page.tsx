@@ -11,7 +11,7 @@ import { useAuth } from "@/components/useAuth";
 import { computeQuote, defaultSelection, type QuoteSelection, type Quote } from "@/lib/pricing";
 
 /**
- * Amplo setup — built for realtors & loan officers, and kept dead simple:
+ * Popd setup — built for realtors & loan officers, and kept dead simple:
  * mostly one-tap choices, only two things to type, smart defaults everywhere.
  */
 export default function Onboarding() {
@@ -105,7 +105,7 @@ export default function Onboarding() {
       const co = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amountMonthly: quote.monthly, label: `Amplo — ${role.label} (${quote.baseLabel})` }),
+        body: JSON.stringify({ amountMonthly: quote.monthly, label: `Popd — ${role.label} (${quote.baseLabel})` }),
       });
       const cod = await co.json();
       router.push(cod.url || "/dashboard?welcome=1");
@@ -141,7 +141,7 @@ export default function Onboarding() {
         {step === 0 && (
           <div>
             <H>What do you do?</H>
-            <P>Amplo is built for real estate and mortgage pros. Pick one and we’ll set everything up around it.</P>
+            <P>Popd is built for real estate and mortgage pros. Pick one and we’ll set everything up around it.</P>
             <div style={{ display: "grid", gap: 12, marginTop: 26 }}>
               {SETUP_ROLES.map((r) => (
                 <button key={r.id} onClick={() => chooseRole(r.id)} className="card"
@@ -176,7 +176,7 @@ export default function Onboarding() {
         {/* STEP 2 — content themes */}
         {step === 2 && role && (
           <div>
-            <H>What should Amplo post about?</H>
+            <H>What should Popd post about?</H>
             <P>We pre-picked the winners for {role.label.toLowerCase()}s. Tap to add or remove — you can change these anytime.</P>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px,1fr))", gap: 10, marginTop: 24 }}>
               {role.themes.map((t) => {
@@ -199,7 +199,7 @@ export default function Onboarding() {
         {step === 3 && (
           <div>
             <H>How should it sound — and how often?</H>
-            <P>Set the vibe and the pace. Amplo handles the rest.</P>
+            <P>Set the vibe and the pace. Popd handles the rest.</P>
 
             <div style={{ fontSize: 13, fontWeight: 800, color: "var(--faint)", marginTop: 26, marginBottom: 10, textTransform: "uppercase", letterSpacing: ".05em" }}>Voice</div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px,1fr))", gap: 10 }}>
@@ -255,7 +255,7 @@ export default function Onboarding() {
         {step === 5 && role && (
           <div>
             <H>Last step — connect your accounts.</H>
-            <P>This is what makes it automatic: Amplo pulls your Google reviews and posts to your pages. (Demo: connections are simulated.)</P>
+            <P>This is what makes it automatic: Popd pulls your Google reviews and posts to your pages. (Demo: connections are simulated.)</P>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 24 }}>
               <ConnectRow name="Google Business" desc="Reviews + local posts" color="#4285F4" letter="G" done={!!connected.google} onDone={() => setConnected((c) => ({ ...c, google: true }))} />
               <ConnectRow name="Instagram" desc="Posts, reels & stories" color="#E4405F" letter="I" done={!!connected.ig} onDone={() => setConnected((c) => ({ ...c, ig: true }))} />

@@ -6,8 +6,8 @@ import { Wordmark } from "@/components/Logo";
 import { NICHES, CONTENT_TYPES } from "@/lib/niches";
 
 const STEPS = [
-  { n: 1, h: "Tell it about you", p: "Choose your niche and describe your business, offers, and the vibe you want. Amplo builds a brand voice that sounds like you — not a robot." },
-  { n: 2, h: "Connect your accounts", p: "Link Google Business, Instagram, and Facebook in a couple of clicks. Amplo pulls in your real Google reviews and posts to your pages." },
+  { n: 1, h: "Tell it about you", p: "Choose your niche and describe your business, offers, and the vibe you want. Popd builds a brand voice that sounds like you — not a robot." },
+  { n: 2, h: "Connect your accounts", p: "Link Google Business, Instagram, and Facebook in a couple of clicks. Popd pulls in your real Google reviews and posts to your pages." },
   { n: 3, h: "Approve & autopilot", p: "A full month of content shows up ready to go. Approve with one tap — or let it post on its own. You stay visible without lifting a finger." },
 ];
 
@@ -22,9 +22,9 @@ const TESTIMONIALS = [
 ];
 
 const FAQS = [
-  { q: "Do I have to write or design anything?", a: "No. You pick your niche and vibe once, and Amplo writes the captions, designs the posts with your logo and colors, and schedules everything. You just approve — or let autopilot handle it." },
+  { q: "Do I have to write or design anything?", a: "No. You pick your niche and vibe once, and Popd writes the captions, designs the posts with your logo and colors, and schedules everything. You just approve — or let autopilot handle it." },
   { q: "Will it really post for me automatically?", a: "Yes. On a paid plan you can connect Instagram, Facebook, and Google Business and switch on autopilot, or keep approval-first control. Free accounts can preview content but can't publish." },
-  { q: "What happens with my Google reviews?", a: "Connect Google Business and Amplo watches for new reviews. Every 5-star review is automatically turned into a branded post that thanks the customer and invites new ones." },
+  { q: "What happens with my Google reviews?", a: "Connect Google Business and Popd watches for new reviews. Every 5-star review is automatically turned into a branded post that thanks the customer and invites new ones." },
   { q: "Do I need to be tech-savvy?", a: "Not at all. Setup takes about a minute — pick your role, add your name and market, choose your look, done. It's built for busy agents and loan officers, not marketers." },
   { q: "Can I cancel anytime?", a: "Yes. Every plan is month-to-month with a 14-day free trial. Cancel from your account settings whenever you like — no contracts." },
   { q: "Will the posts actually look like my brand?", a: "Yes. Upload your logo, set your brand color, pick your templates, and add your own photos. Every post comes out on-brand." },
@@ -46,7 +46,7 @@ export default function Home() {
               Your whole marketing team, <span style={{ color: "var(--brand)" }}>in one tab.</span>
             </h1>
             <p style={{ fontSize: "clamp(17px,1.7vw,20px)", color: "var(--muted)", marginTop: 22, maxWidth: 520, fontWeight: 500 }}>
-              Amplo runs social media and local SEO for your business automatically — writing posts, turning your Google
+              Popd runs social media and local SEO for your business automatically — writing posts, turning your Google
               reviews into content, and keeping you visible. Pick your niche, set it once, and it just runs.
             </p>
             <div style={{ display: "flex", gap: 12, marginTop: 30, flexWrap: "wrap" }}>
@@ -76,7 +76,7 @@ export default function Home() {
       {/* HOW IT WORKS */}
       <section id="how" style={{ padding: "76px 0" }}>
         <div className="wrap">
-          <SectionHead eyebrow="Plug & play" title="Live in 10 minutes. Then it runs itself." sub="No agency retainer, no content calendar to fill in, no “what do I post today?” Amplo learns your business once and takes it from there." />
+          <SectionHead eyebrow="Plug & play" title="Live in 10 minutes. Then it runs itself." sub="No agency retainer, no content calendar to fill in, no “what do I post today?” Popd learns your business once and takes it from there." />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))", gap: 20 }}>
             {STEPS.map((s) => (
               <div key={s.n} className="card" style={{ padding: 26 }}>
@@ -100,7 +100,7 @@ export default function Home() {
                   Your happy customers already write your best ads.
                 </h2>
                 <p style={{ color: "rgba(234,241,236,.78)", marginTop: 14, fontSize: 16, fontWeight: 500 }}>
-                  Amplo connects to Google Business, watches for new reviews, and automatically turns your 5-star ratings
+                  Popd connects to Google Business, watches for new reviews, and automatically turns your 5-star ratings
                   into scroll-stopping social posts — with your branding, a thank-you to the customer, and a call to action.
                   Word-of-mouth, on repeat.
                 </p>
@@ -119,7 +119,7 @@ export default function Home() {
                 </div>
                 <div style={{ alignSelf: "center", color: "var(--brand)" }}>↓</div>
                 <div style={{ background: "#fff", color: "var(--ink)", borderRadius: 16, padding: "15px 16px", boxShadow: "0 30px 60px -20px rgba(0,0,0,.4)" }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--brand)", marginBottom: 8 }}>✨ Amplo post — ready to publish</div>
+                  <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--brand)", marginBottom: 8 }}>✨ Popd post — ready to publish</div>
                   <div style={{ fontSize: 13.5, lineHeight: 1.55, fontWeight: 500 }}>{demoNiche.reviewExample.generatedPost}</div>
                 </div>
               </div>
@@ -131,7 +131,7 @@ export default function Home() {
       {/* CONTENT TYPES */}
       <section style={{ padding: "20px 0 76px" }}>
         <div className="wrap">
-          <SectionHead eyebrow="One engine, every format" title="Tell Amplo what you want. It makes all of it." sub="Mix and match what your business needs. Amplo handles the writing, the design direction, the hashtags, and the schedule." />
+          <SectionHead eyebrow="One engine, every format" title="Tell Popd what you want. It makes all of it." sub="Mix and match what your business needs. Popd handles the writing, the design direction, the hashtags, and the schedule." />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px,1fr))", gap: 16 }}>
             {CONTENT_TYPES.map((t) => (
               <div key={t.id} className="card" style={{ padding: 22 }}>
@@ -147,7 +147,7 @@ export default function Home() {
       {/* TESTIMONIALS */}
       <section style={{ padding: "20px 0 76px" }}>
         <div className="wrap">
-          <SectionHead eyebrow="Loved by local pros" title="Consistent marketing, finally handled." sub="What realtors and loan officers say once Amplo is running in the background." />
+          <SectionHead eyebrow="Loved by local pros" title="Consistent marketing, finally handled." sub="What realtors and loan officers say once Popd is running in the background." />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px,1fr))", gap: 16 }}>
             {TESTIMONIALS.map((t) => (
               <div key={t.name} className="card" style={{ padding: 24, display: "flex", flexDirection: "column", gap: 14 }}>
@@ -196,7 +196,7 @@ export default function Home() {
             <span className="eyebrow"><span className="pulse" /> Set it once</span>
             <h2 style={{ fontSize: "clamp(28px,4vw,46px)", letterSpacing: "-.035em", marginTop: 14, fontWeight: 800, textWrap: "balance" }}>Stop posting. Start growing.</h2>
             <p style={{ color: "var(--muted)", fontSize: 17, margin: "16px auto 0", maxWidth: 520, fontWeight: 500 }}>
-              Give Amplo 10 minutes today, and never worry about your marketing again. Your first month of content is on us.
+              Give Popd 10 minutes today, and never worry about your marketing again. Your first month of content is on us.
             </p>
             <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 28, flexWrap: "wrap" }}>
               <Link href="/signup" className="btn btn-primary">Start free — no card →</Link>
@@ -214,11 +214,11 @@ export default function Home() {
             <a href="#reviews">Reviews → Posts</a>
             <a href="#pricing">Pricing</a>
             <a href="#">FAQ</a>
-            <a href="mailto:hello@amplo.co">Contact</a>
+            <a href="mailto:hello@popd.co">Contact</a>
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
           </div>
-          <div>© {new Date().getFullYear()} Amplo · Local marketing on autopilot.</div>
+          <div>© {new Date().getFullYear()} Popd · Local marketing on autopilot.</div>
         </div>
       </footer>
     </>

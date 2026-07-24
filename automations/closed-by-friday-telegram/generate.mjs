@@ -24,12 +24,12 @@
  *
  * Env:
  *   ANTHROPIC_API_KEY   live AI generation (omit → built-in sample)
- *   AMPLO_MODEL         model id (default claude-sonnet-5)
+ *   POPD_MODEL         model id (default claude-sonnet-5)
  */
 import { CBF } from "./brand.mjs";
 
 const SEND = process.argv.includes("--send");
-const MODEL = process.env.AMPLO_MODEL || "claude-sonnet-5";
+const MODEL = process.env.POPD_MODEL || process.env.AMPLO_MODEL || "claude-sonnet-5";
 const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TG_CHAT = process.env.TELEGRAM_CHAT_ID;
 const RELAY_URL = process.env.CBF_RELAY_URL; // optional; only if reachable

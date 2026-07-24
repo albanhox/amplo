@@ -62,7 +62,7 @@ export async function createCheckout(opts: {
             currency: "usd",
             recurring: { interval: "month" as const },
             unit_amount: Math.round(opts.amountMonthly! * 100),
-            product_data: { name: opts.label || "Amplo plan" },
+            product_data: { name: opts.label || "Popd plan" },
           },
           quantity: 1,
         },

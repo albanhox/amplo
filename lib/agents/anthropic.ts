@@ -10,7 +10,9 @@ import Anthropic from "@anthropic-ai/sdk";
 const apiKey = process.env.ANTHROPIC_API_KEY;
 export const isLive = Boolean(apiKey);
 
-const model = process.env.AMPLO_MODEL || "claude-sonnet-5";
+// POPD_MODEL is the current name; AMPLO_MODEL kept as a fallback so existing
+// deployments set under the old brand keep working until they're updated.
+const model = process.env.POPD_MODEL || process.env.AMPLO_MODEL || "claude-sonnet-5";
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {

@@ -1,8 +1,8 @@
 {
-  "name": "amplo",
+  "name": "popd",
   "version": "0.1.0",
   "private": true,
-  "description": "Amplo — AI social media & local SEO on autopilot for local businesses.",
+  "description": "Popd — AI social media & local SEO on autopilot for local businesses.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
