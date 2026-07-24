@@ -15,7 +15,9 @@ Vercel hosts the app for free to start and connects straight to your GitHub.
 
 1. Go to **https://vercel.com** → **Sign Up** → **Continue with GitHub**.
 2. Click **Add New… → Project**.
-3. Find **`albanhox/social-media-and-SEO-builder`** in the list → **Import**.
+3. Find **`albanhox/amplo`** in the list → **Import**. (The GitHub repo is still
+   named `amplo`; the product is Popd. Renaming the repo is optional — Vercel
+   keeps working through it.)
 4. Vercel auto-detects Next.js. Leave everything default.
 5. Click **Deploy**. Wait ~2 minutes.
 6. You'll get a live URL like `https://popd-xxxx.vercel.app`. **That's your app, live.** 🎉
@@ -79,9 +81,10 @@ with the `sk_live_…` key and a new live webhook, redeploy. Done — you're cha
 
 These make it a real business, not a demo. Tackle in any order.
 
-- **Database (so data persists).** Add **Vercel Postgres** or **Supabase** (both have
-  free tiers) and point `lib/db` at it. The repositories are already abstracted, so
-  it's a contained change — ask me and I'll wire it.
+- **Database (so data persists).** ✅ **Built.** `lib/db/store.ts` runs on Postgres
+  whenever `DATABASE_URL` is set (Supabase pooler works as-is) and falls back to a
+  local JSON file for dev. Just set `DATABASE_URL` in Vercel → Environment Variables
+  and redeploy — nothing to wire.
 - **Autopilot schedule.** Already configured in `vercel.json` to run daily. To turn it
   on, add an env var `CRON_SECRET` (any long random string) — Vercel Cron uses it
   automatically. (More-frequent runs need Vercel's Pro plan.)
