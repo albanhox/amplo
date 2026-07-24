@@ -5,7 +5,7 @@
  * Demo path: composes believable output from the niche seed library so the
  * product works with no API key.
  */
-import { completeJSON, isLive } from "./anthropic";
+import { completeJSON, isLive } from "./gemini";
 import { getNiche, type ContentType } from "@/lib/niches";
 import type { GenerateRequest, GeneratedPost } from "./types";
 

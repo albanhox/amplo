@@ -33,6 +33,16 @@ export interface GeneratedPost {
   hashtags: string[];
   /** For video scripts: hook + shot list, already folded into caption. */
   callToAction?: string;
+  /** Optional AI-generated visual (nano-banana), as a data: URL. */
+  imageUrl?: string;
+}
+
+export interface ImageRequest {
+  brand: BrandProfile;
+  /** The post this image should illustrate (its caption steers the visual). */
+  caption?: string;
+  /** Optional explicit subject/steer for the image. */
+  topic?: string;
 }
 
 export interface ReviewInput {

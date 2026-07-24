@@ -34,13 +34,17 @@ plan builder all work. AI + payments are simulated until you add keys (next stag
 
 ## Stage 2 — Turn on the real AI · ~5 min
 
-1. Go to **https://console.anthropic.com** → sign in → **API Keys** → **Create Key**.
-   Copy it (starts with `sk-ant-`).
+1. Go to **https://aistudio.google.com/apikey** → **Create API key**. Copy it.
 2. In Vercel: your project → **Settings → Environment Variables**.
 3. Add:
-   - `ANTHROPIC_API_KEY` = your key
-   - `POPD_MODEL` = `claude-sonnet-5`
+   - `GEMINI_API_KEY` = your key
+   - *(optional)* `POPD_IMAGE_MODEL` = `gemini-3.1-flash-image` for the newer
+     "Nano Banana 2" visuals — otherwise it defaults to `gemini-2.5-flash-image`.
 4. Click **Save**, then **Deployments → ⋯ → Redeploy** (env vars apply on next deploy).
+
+This powers both the written posts (`gemini-2.5-flash`) and the **🎨 Generate
+image** button on each post (nano-banana). No key → the app still runs on its
+built-in demo generator; images just stay off.
 
 Now every post is written by real AI. The Content Studio will show **“✓ Live AI.”**
 

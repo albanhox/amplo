@@ -165,6 +165,29 @@ function Studio({ brand, isPaid, onUpgrade }: { brand: BrandProfile; isPaid: boo
 function PostCard({ post, brand, isPaid, onUpgrade }: { post: GeneratedPost; brand: BrandProfile; isPaid: boolean; onUpgrade: () => void }) {
   const niche = getNiche(brand.nicheId) || NICHES[0];
   const [status, setStatus] = useState<"draft" | "scheduled">("draft");
+  const [imageUrl, setImageUrl] = useState<string | null>(post.imageUrl ?? null);
+  const [imgLoading, setImgLoading] = useState(false);
+  const [imgNote, setImgNote] = useState<string | null>(null);
+
+  async function makeImage() {
+    setImgLoading(true);
+    setImgNote(null);
+    try {
+      const res = await fetch("/api/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brand, caption: post.caption }),
+      });
+      const data = await res.json();
+      if (data.imageUrl) setImageUrl(data.imageUrl);
+      else setImgNote(data.live === false ? "Add a Gemini key to generate images" : "Couldn't generate an image — try again");
+    } catch {
+      setImgNote("Couldn't generate an image — try again");
+    } finally {
+      setImgLoading(false);
+    }
+  }
+
   return (
     <div className="card" style={{ overflow: "hidden" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderBottom: "1px solid var(--line-2)" }}>
@@ -175,10 +198,15 @@ function PostCard({ post, brand, isPaid, onUpgrade }: { post: GeneratedPost; bra
         </div>
         <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 800, color: "var(--brand)", background: "var(--brand-soft)", borderRadius: 7, padding: "3px 9px", textTransform: "capitalize" }}>{post.type}</span>
       </div>
+      {imageUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={imageUrl} alt="AI-generated visual" style={{ width: "100%", display: "block", aspectRatio: "1 / 1", objectFit: "cover" }} />
+      )}
       <div style={{ padding: 14, fontSize: 14.5, lineHeight: 1.55, fontWeight: 500 }}>
         {post.caption}{" "}
         {post.hashtags?.length ? <span style={{ color: "var(--brand)", fontWeight: 700 }}>{post.hashtags.map((h) => `#${h}`).join(" ")}</span> : null}
       </div>
+      {imgNote && <div style={{ padding: "0 14px 10px", fontSize: 12, color: "var(--faint)", fontWeight: 600 }}>{imgNote}</div>}
       <div style={{ display: "flex", gap: 8, padding: "11px 14px", borderTop: "1px solid var(--line-2)" }}>
         {isPaid ? (
           <button onClick={() => setStatus("scheduled")} className="btn btn-primary" style={{ padding: "7px 13px", fontSize: 13 }}>
@@ -187,7 +215,9 @@ function PostCard({ post, brand, isPaid, onUpgrade }: { post: GeneratedPost; bra
         ) : (
           <button onClick={onUpgrade} className="btn btn-primary" style={{ padding: "7px 13px", fontSize: 13 }}>🔒 Upgrade to publish</button>
         )}
-        <button className="btn btn-ghost" style={{ padding: "7px 13px", fontSize: 13 }}>Edit</button>
+        <button onClick={makeImage} disabled={imgLoading} className="btn btn-ghost" style={{ padding: "7px 13px", fontSize: 13 }}>
+          {imgLoading ? "Creating…" : imageUrl ? "↻ New image" : "🎨 Generate image"}
+        </button>
       </div>
     </div>
   );

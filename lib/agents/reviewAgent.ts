@@ -5,7 +5,7 @@
  * branded, ready-to-publish social posts that thank the customer and invite
  * new ones. Live path uses Claude; demo path composes from the review text.
  */
-import { completeJSON, isLive } from "./anthropic";
+import { completeJSON, isLive } from "./gemini";
 import { getNiche } from "@/lib/niches";
 import type { BrandProfile, ReviewInput, GeneratedPost } from "./types";
 
